@@ -36,7 +36,6 @@ spec:
 
         stage('Seed All') {
             steps {
-                sh 'ls -lad ${WORKSPACE}/pipelines/HelloWorldPipeline.groovy'
                 jobDsl removedConfigFilesAction: 'DELETE', removedJobAction: 'DELETE', removedViewAction: 'DELETE', targets: 'pipelines/DSL**.groovy'
             }
         }
