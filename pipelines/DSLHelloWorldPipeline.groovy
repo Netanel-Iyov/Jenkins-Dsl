@@ -2,9 +2,6 @@
 pipelineJob('Test-Pipeline') {
     definition {
         cps {
-            script = readFileFromWorkspace("./pipelines/HelloWorldPipeline.groovy")
-            echo "Pipeline script: ${script}"
-            
             readFileFromWorkspace("./pipelines/HelloWorldPipeline.groovy")
         }
     }
