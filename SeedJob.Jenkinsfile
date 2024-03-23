@@ -1,8 +1,23 @@
-// Seed Job Jenkins File
-job('seed-job') {
-    description('Seed Job for generating Pipeline jobs from DSL scripts')
-
-    steps {
-        sh 'Hello World'
+// Uses Declarative syntax to run commands inside a container.
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: shell
+    image: ubuntu
+'''
+            defaultContainer 'shell'
+        }
+    }
+    stages {
+        stage('Main') {
+            steps {
+                sh 'echo "Hello World from Jenkinsfile"'
+            }
+        }
     }
 }
