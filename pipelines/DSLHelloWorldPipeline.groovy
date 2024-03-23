@@ -2,7 +2,7 @@
 pipelineJob('my-pipeline') {
     definition {
         cps {
-            readFileFromWorkspace('pipelines/HelloWorldPipeline.groovy')
+            readFileFromWorkspace("${WORKSPACE}/pipelines/HelloWorldPipeline.groovy")
             sandbox()
         }
     }
