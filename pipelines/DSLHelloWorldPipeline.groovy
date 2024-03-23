@@ -1,5 +1,5 @@
 // Uses Declarative syntax to run commands inside a container.
-pipelineJob('my-pipeline') {
+pipelineJob('Test-Pipeline') {
     definition {
         cps {
             readFileFromWorkspace("${WORKSPACE}/pipelines/HelloWorldPipeline.groovy")

@@ -22,7 +22,6 @@ spec:
         stage('Checkout') {
             steps {
                 cleanWs()
-                
                 withCredentials([string(credentialsId: 'Personal-Github-Token', variable: 'GITHUB_TOKEN')]) { 
                     checkout([
                         $class: 'GitSCM',
@@ -37,6 +36,7 @@ spec:
 
         stage('Seed All') {
             steps {
+                sh 'ls -la && env'
                 jobDsl removedConfigFilesAction: 'DELETE', removedJobAction: 'DELETE', removedViewAction: 'DELETE', targets: 'pipelines/DSL**.groovy'
             }
         }
