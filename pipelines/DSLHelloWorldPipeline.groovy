@@ -3,9 +3,6 @@ pipelineJob('Test-Pipeline') {
     definition {
         cps {
             readFileFromWorkspace("./pipelines/HelloWorldPipeline.groovy")
-            sandbox()
         }
     }
-
-
 }
