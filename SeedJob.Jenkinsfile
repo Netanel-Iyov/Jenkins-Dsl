@@ -1,13 +1,31 @@
-job('Seed All') {
-  scm {
-    git ('https://github.com/Netanel-Iyov/Jenkins-Dsl.git')
-  }
-  steps {
-    dsl {
-      external('pipelines/DSL**.groovy')  
-      // default behavior
-      // removeAction('IGNORE')      
-      removeAction('DELETE')
+// Uses Declarative syntax to run commands inside a container.
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: shell
+    image: ubuntu
+    command:
+    - sleep
+    args:
+    - infinity
+'''
+            defaultContainer 'shell'
+        }
     }
-  }
+    scm {
+        git ('https://github.com/Netanel-Iyov/Jenkins-Dsl.git')
+    }
+
+    stages {
+        stage('Seed All') {
+            steps {
+                jobDsl removedConfigFilesAction: 'DELETE', removedJobAction: 'DELETE', removedViewAction: 'DELETE', targets: 'pipelines/DSL**.groovy'
+            }
+        }
+    }
 }
