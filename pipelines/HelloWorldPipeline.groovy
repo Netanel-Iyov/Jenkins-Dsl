@@ -1,13 +1,12 @@
 pipeline {
-   
     agent {
         kubernetes {
             yaml '''
 apiVersion: v1
 kind: Pod
 spec:
-containers:
-- name: shell
+  containers:
+  - name: shell
     image: ubuntu
     command:
     - sleep
