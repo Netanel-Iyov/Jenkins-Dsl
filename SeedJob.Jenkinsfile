@@ -21,7 +21,7 @@ spec:
     stages {
         stage('Checkout') {
             steps {
-                cleanWs()
+                cleanWs() 
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/main']],
