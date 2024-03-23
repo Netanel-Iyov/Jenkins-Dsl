@@ -21,14 +21,17 @@ spec:
     stages {
         stage('Checkout') {
             steps {
-                cleanWs() 
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/Netanel-Iyov/Jenkins-Dsl.git'
-                    ]]
-                ])
+                cleanWs()
+                
+                withCredentials([string(credentialsId: 'Personal-Github-Token', variable: 'GITHUB_TOKEN')]) { 
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/main']],
+                        userRemoteConfigs: [[
+                            url: "https://${GITHUB_TOKEN}@github.com/Netanel-Iyov/Jenkins-Dsl.git"
+                        ]]
+                    ])
+                }
             }
         }
 
