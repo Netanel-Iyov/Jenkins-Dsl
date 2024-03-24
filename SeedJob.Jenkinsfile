@@ -22,7 +22,7 @@ spec:
         stage('Checkout') {
             steps {
                 cleanWs()
-                
+
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/main']],
@@ -38,9 +38,7 @@ spec:
 
         stage('Seed All') {
             steps {
-                jobDsl {
-                    removedConfigFilesAction: 'DELETE', removedJobAction: 'DELETE', removedViewAction: 'DELETE', targets: 'pipelines/DSL**.groovy'
-                }
+                jobDsl removedConfigFilesAction: 'DELETE', removedJobAction: 'DELETE', removedViewAction: 'DELETE', targets: 'pipelines/DSL**.groovy'
             }
         }
     }
