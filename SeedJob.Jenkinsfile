@@ -22,15 +22,14 @@ spec:
         stage('Checkout') {
             steps {
                 cleanWs()
-                withCredentials([string(credentialsId: 'Personal-Github-Token', variable: 'GITHUB_TOKEN')]) { 
                     checkout([
                         $class: 'GitSCM',
                         branches: [[name: '*/main']],
-                        userRemoteConfigs: [[
-                            url: "https://${GITHUB_TOKEN}@github.com/Netanel-Iyov/Jenkins-Dsl.git"
-                        ]]
+                        userRemoteConfigs: [
+                            [ url: "https://github.com/Netanel-Iyov/Jenkins-Dsl.git"],
+                            [ credentialsId: 'Github-Credentials']
+                        ]
                     ])
-                }
             }
         }
 
