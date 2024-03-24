@@ -22,26 +22,24 @@ spec:
         stage('Checkout') {
             steps {
                 cleanWs()
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: '*/main']],
-                        userRemoteConfigs: [
-                            [ 
-                                url: "https://github.com/Netanel-Iyov/Jenkins-Dsl.git",
-                                credentialsId: 'Github-Credentials'
-                            ]
+                
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [
+                        [ 
+                            url: "https://github.com/Netanel-Iyov/Jenkins-Dsl.git",
+                            credentialsId: 'Github-Credentials'
                         ]
-                    ])
+                    ]
+                ])
             }
         }
 
         stage('Seed All') {
             steps {
                 jobDsl {
-                    removedConfigFilesAction('DELETE'),
-                    removedJobAction('DELETE')
-                    removedViewAction('DELETE')
-                    targets('pipelines/DSL**.groovy')
+                    removedConfigFilesAction: 'DELETE', removedJobAction: 'DELETE', removedViewAction: 'DELETE', targets: 'pipelines/DSL**.groovy'
                 }
             }
         }
