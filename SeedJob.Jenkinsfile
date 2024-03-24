@@ -26,8 +26,10 @@ spec:
                         $class: 'GitSCM',
                         branches: [[name: '*/main']],
                         userRemoteConfigs: [
-                            [ url: "https://github.com/Netanel-Iyov/Jenkins-Dsl.git"],
-                            [ credentialsId: 'Github-Credentials']
+                            [ 
+                                url: "https://github.com/Netanel-Iyov/Jenkins-Dsl.git",
+                                credentialsId: 'Github-Credentials'
+                            ]
                         ]
                     ])
             }
