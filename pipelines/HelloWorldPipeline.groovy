@@ -14,21 +14,15 @@
 //         }
 //     }
 // }
-pipeline {
-    agent none
-
-    podTemplate(containers: [
-        containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent:4.13.3-1', args: '${computer.jnlpmac} ${computer.name}')
-    ]) {
-        stages {
-            node(POD_LABEL) {
-                stage('Test') {
-                    steps {
-                        container('jnlp') {
-                            sh 'echo "Hello World"'
-                            sh "echo ${POD_LABEL}"
-                        }
-                    }
+podTemplate(containers: [
+    containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent:4.13.3-1', args: '${computer.jnlpmac} ${computer.name}')
+]) {
+    node(POD_LABEL) {
+        stage('Test') {
+            steps {
+                container('jnlp') {
+                    sh 'echo "Hello World"'
+                    sh "echo ${POD_LABEL}"
                 }
             }
         }
