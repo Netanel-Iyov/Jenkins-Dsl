@@ -1,29 +1,19 @@
-// pipeline {
-//     agent {
-//         kubernetes {
-//             inheritFrom 'jnlp-pod-agent'
-//             defaultContainer 'jnlp'
-//         }
-//     }
+pipeline {
+    agent {
+        kubernetes {
+            // inheritFrom 'jnlp-pod-agent'
+            containerTemplate {
+                name 'jnlp'
+                image 'jenkins/inbound-agent:4.13.3-1'
+            }
+            defaultContainer 'jnlp'
+        }
+    }
 
-//     stages {
-//         stage('Build') {
-//             steps {
-//                 sh 'echo "Hello World"'
-//             }
-//         }
-//     }
-// }
-podTemplate(containers: [
-    containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent:4.13.3-1', args: '${computer.jnlpmac} ${computer.name}')
-]) {
-    node(POD_LABEL) {
-        stage('Test') {
+    stages {
+        stage('Build') {
             steps {
-                container('jnlp') {
-                    sh 'echo "Hello World"'
-                    sh "echo ${POD_LABEL}"
-                }
+                sh 'echo "Hello World"'
             }
         }
     }
