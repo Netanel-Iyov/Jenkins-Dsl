@@ -7,8 +7,8 @@ pipeline {
 
     stages {
         stage('Build') {
-            container('jnlp') {
-                steps {
+            steps {
+                container('jnlp') {
                     sh 'echo "Hello World"'
                 }
             }
