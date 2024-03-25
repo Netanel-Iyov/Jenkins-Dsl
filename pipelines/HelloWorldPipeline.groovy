@@ -1,11 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            // inheritFrom 'jnlp-pod-agent'
-            containerTemplate {
-                name 'jnlp'
-                image 'jenkins/inbound-agent:4.13.3-1'
-            }
+            inheritFrom 'jnlp-pod-agent'
             defaultContainer 'jnlp'
         }
     }
