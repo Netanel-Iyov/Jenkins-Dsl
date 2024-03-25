@@ -20,8 +20,8 @@ pipeline {
     podTemplate(containers: [
         containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent:4.13.3-1', args: '${computer.jnlpmac} ${computer.name}')
     ]) {
-        node(POD_LABEL) {
-            stages {
+        stages {
+            node(POD_LABEL) {
                 stage('Test') {
                     steps {
                         container('jnlp') {
