@@ -6,10 +6,10 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
+        stage('Checkout') {
             steps {
                 container('jnlp') {
-                    sh 'echo "Hello World"'
+                    cleanWs()
                 }
             }
         }
