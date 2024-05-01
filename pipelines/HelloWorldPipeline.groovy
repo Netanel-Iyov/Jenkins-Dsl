@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom 'todo-list-CICD'
+            inheritFrom 'jnlp'
         }
     }
 
