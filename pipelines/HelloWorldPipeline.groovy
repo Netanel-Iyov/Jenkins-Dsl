@@ -23,11 +23,13 @@ pipeline {
         // }
 
         stage('Build') {
-            container('docker') {
-                dir('api') {
-                    script {
-                        sh 'ls -la'
-                        sh 'docker build .'
+            steps {
+                container('docker') {
+                    dir('api') {
+                        script {
+                            sh 'ls -la'
+                            sh 'docker build .'
+                        }
                     }
                 }
             }
