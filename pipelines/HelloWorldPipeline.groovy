@@ -1,15 +1,15 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom 'jnlp-pod-agent'
+            inheritFrom 'todo-list-CICD'
         }
     }
 
     stages {
-        stage('Build') {
+        stage('Clean workspace') {
             steps {
                 container('jnlp') {
-                    sh 'echo "Hello World"'
+                    cleanWs()
                 }
             }
         }
