@@ -35,8 +35,8 @@ pipeline {
             }
         }
 
-        stage('Push To Registry') {
+        // stage('Push To Registry') {
 
-        }
+        // }
     }
 }
