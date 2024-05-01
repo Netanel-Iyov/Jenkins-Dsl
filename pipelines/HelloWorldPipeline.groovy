@@ -17,5 +17,24 @@ pipeline {
                 }
             }
         }
+
+        // stage('Test') {
+
+        // }
+
+        stage('Build') {
+            container('docker') {
+                dir('api') {
+                    script {
+                        sh 'ls -la'
+                        sh 'docker build .'
+                    }
+                }
+            }
+        }
+
+        stage('Push To Registry') {
+
+        }
     }
 }
