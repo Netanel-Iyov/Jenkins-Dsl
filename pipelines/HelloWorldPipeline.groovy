@@ -20,7 +20,7 @@ spec:
   - name: docker-daemon
     hostPath:
       path: /var/run/docker.sock
-      type: Directory
+      type: Socket
 '''
         }
     }
