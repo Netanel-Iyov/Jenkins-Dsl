@@ -1,9 +1,31 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom 'jnlp'
+            yaml '''
+              apiVersion: v1
+              kind: Pod
+              spec:
+                containers:
+                  - name: docker
+                    image: docker:latest
+                    command:
+                    - ["sleep"]
+                    args:
+                    - ["99d"]
+                    volumeMounts:
+                    - name: docker-daemon
+                      mountPath: /var/run/docker.sock
+                    tty: true
+                volumes:
+                - name: docker-daemon
+                  hostPath:
+                  path: /var/run/docker.sock
+                  type: Directory
+                
+            '''
         }
     }
+
 
     stages {
         stage('Checkout') {
