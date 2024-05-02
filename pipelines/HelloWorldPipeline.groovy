@@ -47,7 +47,7 @@ spec:
         stage('Build') {
             steps {
                 container('docker') {
-                    dir('client') {
+                    dir('api') {
                         script {
                             sh 'ls -la'
                             sh 'docker build . -f Dockerfile.prod'
