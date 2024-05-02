@@ -1,6 +1,7 @@
 pipeline {
     agent {
         kubernetes {
+            // TODO: remove from here and extract to a different file
             yaml '''
 apiVersion: v1
 kind: Pod
@@ -46,10 +47,10 @@ spec:
         stage('Build') {
             steps {
                 container('docker') {
-                    dir('api') {
+                    dir('client') {
                         script {
                             sh 'ls -la'
-                            sh 'docker build .'
+                            sh 'docker build . -f Dockerfile.dev'
                         }
                     }
                 }
