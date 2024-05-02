@@ -50,7 +50,7 @@ spec:
                     dir('client') {
                         script {
                             sh 'ls -la'
-                            sh 'docker build . -f Dockerfile.dev'
+                            sh 'docker build . -f Dockerfile.prod'
                         }
                     }
                 }
