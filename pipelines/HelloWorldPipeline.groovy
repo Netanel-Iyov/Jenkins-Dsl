@@ -5,23 +5,23 @@ pipeline {
 apiVersion: v1
 kind: Pod
 spec:
-containers:
-    - name: docker
+  containers:
+  - name: docker
     image: docker:latest
     command:
-    - ["sleep"]
+    - "sleep"
     args:
-    - ["99d"]
+    - "99d"
     volumeMounts:
     - name: docker-daemon
-        mountPath: /var/run/docker.sock
+      mountPath: /var/run/docker.sock
     tty: true
-volumes:
-- name: docker-daemon
+  volumes:
+  - name: docker-daemon
     hostPath:
-    path: /var/run/docker.sock
-    type: Directory
-
+      path: /var/run/docker.sock
+      type: Directory
+'''
 '''
         }
     }
