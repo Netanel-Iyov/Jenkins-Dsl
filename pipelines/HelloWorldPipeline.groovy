@@ -22,7 +22,6 @@ spec:
       path: /var/run/docker.sock
       type: Directory
 '''
-'''
         }
     }
 
