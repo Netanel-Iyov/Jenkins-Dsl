@@ -1,5 +1,5 @@
 pipeline {
-    agent {
+   agent {
         kubernetes {
             // TODO: remove from here and extract to a different file
             yaml '''
@@ -9,10 +9,14 @@ spec:
   containers:
   - name: python
     image: python:3.9
+    command:
+    - sleep
+    args:
+    - infinity
 '''
             defaultContainer 'python'
         }
-    }
+    } 
 
     parameters {
         string(name: 'BRANCH', description: 'Git branch to checkout on', defaultValue: 'main')
