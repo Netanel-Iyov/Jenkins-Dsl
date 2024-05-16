@@ -32,7 +32,7 @@ spec:
             steps {
                 cleanWs()
                 echo "branch is ${BRANCH}"
-                git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Home-Server.git', branch: 'dns-records-go-daddy-creds-as-arguments' // "${BRANCH}"
+                git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Home-Server.git', branch: "${BRANCH}"
                 script {
                     sh 'ls -la'
                 }
