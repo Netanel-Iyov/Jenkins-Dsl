@@ -32,7 +32,7 @@ spec:
             steps {
                 cleanWs()
                 echo "branch is ${BRANCH}"
-                git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Home-Server.git', branch: "${params.BRANCH}"
+                git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Home-Server.git', branch: 'dns-records-go-daddy-creds-as-arguments' // "${BRANCH}"
                 script {
                     sh 'ls -la'
                 }
@@ -41,10 +41,9 @@ spec:
 
         stage('Update DNS') {
             steps {
-                withCredentials([string(credentialsId: 'go-daddy-api-key', variable: 'api_key'), string(credentialsId: 'go-daddy-api-secret', variable: 'api_secret') ]) 
+                withCredentials([string(credentialsId: 'go-daddy-api-key', variable: 'api-key'), string(credentialsId: 'go-daddy-api-secret', variable: 'api-secret') ]) 
                 {
-                    sh 'printenv'
-                    sh "pip install requests && python3 ./misc/update_DNS_record.py --domain niyov.com --record-names ${params.RECORD_NAMES}"
+                    sh "pip install requests && python3 ./misc/update_DNS_record.py --domain niyov.com --record-names ${RECORD_NAMES} --api-key ${api-key} --api-secret ${api-secret}"
                 }
             }
         }
