@@ -33,9 +33,6 @@ spec:
                 cleanWs()
                 echo "branch is ${BRANCH}"
                 git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Home-Server.git', branch: "${BRANCH}"
-                script {
-                    sh 'ls -la'
-                }
             }
         }
 
@@ -43,7 +40,9 @@ spec:
             steps {
                 withCredentials([string(credentialsId: 'go-daddy-api-key', variable: 'api-key'), string(credentialsId: 'go-daddy-api-secret', variable: 'api-secret') ]) 
                 {
-                    sh "pip install requests && python3 ./misc/update_DNS_record.py --domain niyov.com --record-names ${RECORD_NAMES} --api-key $api-key --api-secret $api-secret"
+                    sh """pip install requests
+                    python3 ./misc/update_DNS_record.py --domain niyov.com --record-names ${RECORD_NAMES} --api-key ${api-key} --api-secret ${api-secret}
+                    """
                 }
             }
         }
