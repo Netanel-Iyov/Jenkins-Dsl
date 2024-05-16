@@ -38,10 +38,10 @@ spec:
 
         stage('Update DNS') {
             steps {
-                withCredentials([string(credentialsId: 'go-daddy-api-key', variable: 'api-key'), string(credentialsId: 'go-daddy-api-secret', variable: 'api-secret') ]) 
+                withCredentials([string(credentialsId: 'go-daddy-api-key', variable: 'api_key'), string(credentialsId: 'go-daddy-api-secret', variable: 'api_secret') ]) 
                 {
                     sh """pip install requests
-                    python3 ./misc/update_DNS_record.py --domain niyov.com --record-names ${RECORD_NAMES} --api-key ${api-key} --api-secret ${api-secret}
+                    python3 ./misc/update_DNS_record.py --domain niyov.com --record-names ${RECORD_NAMES} --api-key ${api_key} --api-secret ${api_secret}
                     """
                 }
             }
