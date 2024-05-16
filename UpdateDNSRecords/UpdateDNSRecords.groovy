@@ -27,7 +27,7 @@ spec:
         stage('Checkout') {
             steps {
                 cleanWs()
-                git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Home-Server.git', branch: "${BRANCH}",
+                git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Home-Server.git', branch: "${BRANCH}"
                 script {
                     sh 'ls -la'
                 }
