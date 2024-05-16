@@ -7,10 +7,10 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: python3.9
+  - name: python
     image: python:3.9
 '''
-            defaultContainer 'python3.9'
+            defaultContainer 'python'
         }
     }
 
