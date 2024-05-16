@@ -1,0 +1,47 @@
+pipeline {
+    agent {
+        kubernetes {
+            // TODO: remove from here and extract to a different file
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: python3.9
+    image: python:3.9
+'''
+            defaultContainer 'python3.9'
+        }
+    }
+
+    parameters {
+        string(name: 'BRANCH', description: 'Git branch to checkout on', defaultValue: 'main')
+        string(name: 'RECORD_NAMES', description: 'Select Record Names (seperated by space)', defaultValue: '@ jenkins argocd')
+    }
+    
+    triggers {
+        cron('*/30 * * * *')  // Run the build every half an hour
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Home-Server.git', branch: "${BRANCH}",
+                script {
+                    sh 'ls -la'
+                }
+            }
+        }
+
+        stage('Update DNS') {
+            steps {
+                withCredentials([string(credentialsId: 'go-daddy-api-key', variable: 'api_key'), string(credentialsId: 'go-daddy-api-secret', variable: 'api_secret') ]) 
+                {
+                    sh "pip install requests && python3 ./misc/update_DNS_record.py --domain niyov.com --record-names ${RECORD_NAMES}"
+                }
+            }
+        }
+        
+    }
+}
