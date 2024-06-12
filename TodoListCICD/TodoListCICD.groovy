@@ -22,7 +22,33 @@ def applicationValues = [
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'TodoListCICD/KubernetesPod.yaml'
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: shell
+      image: ubuntu
+      command:
+        - sleep
+      args:
+        - infinity
+    - name: docker
+      image: docker:latest
+      command:
+        - "sleep"
+      args:
+        - "99d"
+      volumeMounts:
+        - name: docker-daemon
+          mountPath: /var/run/docker.sock
+      tty: true
+  volumes:
+    - name: docker-daemon
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
+            '''
             defaultContainer 'shell'
         }
     }
@@ -49,25 +75,30 @@ pipeline {
             // 5. if both tags are valid then continue the pipeline.
             // 6. if not valid, then notify somehow and exit the pipeline with Failed status code
             steps {
-                dir('Todo-list') {
-                    script {
-                        applicationValues.each { appLabel, appData ->
-                            def jsonFile = readFile(file: appData.versionsFile)
-                            def jsonData = readJSON(text: jsonFile)
-
-                            def version = jsonData.version
-
-                            // check if changed files match 
-                            def changedFilesMatched = true
-                            def imageTag = "${appData.imageName}:${version}"
-                            def isImageExist = sh("docker manifest inspect ${imageTag} > /dev/null" == 0, returnStatus: true) ? true : false
-                            
-                            if (changedFilesMatched && !isImageExist) {
-                                appData['toDeploy'] = true
-                                appData['tag'] = imageTag
-                            } else {
-                                appData['toDeploy'] = false
-                                sh "echo 'Tag ${imageTag} already exist in docker registry. Please make sure you didnt forget to update the version in ${versionFile}'"
+                container('docker') {
+                    dir('Todo-list') {
+                        script {
+                            applicationValues.each { appLabel, appData ->
+                                def jsonFile = readFile(file: appData.versionFile)
+                                def jsonData = readJSON(text: jsonFile)
+    
+                                def version = jsonData.version
+    
+                                // check if changed files match 
+                                def changedFilesMatched = true
+                                def imageTag = "${appData.imageName}:${version}"
+                                
+                                withCredentials([usernamePassword(credentialsId: 'DockerHub-Credentials', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                                    def isImageExist = sh(script: "docker login -u ${USERNAME} -p ${PASSWORD} && docker manifest inspect ${imageTag} > /dev/null", returnStatus: true) == 0 ? true : false
+                                
+                                    if (changedFilesMatched && !isImageExist) {
+                                        appData['toDeploy'] = true
+                                        appData['tag'] = imageTag
+                                    } else {
+                                        appData['toDeploy'] = false
+                                        sh "echo 'Tag ${imageTag} already exist in docker registry. Please make sure you didnt forget to update the version in ${versionFile}'"
+                                    }
+                                }
                             }
                         }
                     }
@@ -81,19 +112,18 @@ pipeline {
 
         stage("Build API & Push To Registry") {
             steps {
-                dir('Todo-list') {
+                dir("Todo-list/${applicationValues.api.workdir}") {
                     script {
-                        if (applicationValues.api.toDeploy) {
-                            container('docker') {
-                                dir(appData.workdir) {
-                                    docker.withRegistry('https://hub.docker.com', 'DockerHub-Credentials') {
-                                        def dockerImage = docker.build(applicationValues.api.tag, "-f Dockerfile.prod .")
-                                        // dockerImage.push()
-                                    }
+                        container('docker') {
+                            sh 'pwd && ls -la'
+                            if (applicationValues.api.toDeploy) {
+                                docker.withRegistry('https://registry.hub.docker.com', 'DockerHub-Credentials') {
+                                    def dockerImage = docker.build(applicationValues.api.tag, "-f Dockerfile.prod .")
+                                    // dockerImage.push()
                                 }
+                            } else {
+                                Utils.markStageSkippedForConditional(STAGE_NAME)
                             }
-                        } else {
-                            Utils.markStageSkippedForConditional(STAGE_NAME)
                         }
                     }
                 }
@@ -102,15 +132,13 @@ pipeline {
 
         stage("Build Client & Push To Registry") {
             steps {
-                dir('Todo-list/client') {
+                dir("Todo-list/${applicationValues.client.workdir}") {
                     script {
                         if (applicationValues.client.toDeploy) {
                             container('docker') {
-                                dir(appData.workdir) {
-                                    docker.withRegistry('https://hub.docker.com', 'DockerHub-Credentials') {
-                                        def dockerImage = docker.build(applicationValues.client.tag, "-f Dockerfile.prod .")
-                                        // dockerImage.push()
-                                    }
+                                docker.withRegistry('https://registry.hub.docker.com', 'DockerHub-Credentials') {
+                                    def dockerImage = docker.build(applicationValues.client.tag, "-f Dockerfile.prod .")
+                                    // dockerImage.push()
                                 }
                             }
                         } else {
@@ -153,9 +181,10 @@ pipeline {
                             }
                             
                             // Write the modified deploymentFileData back to the deployment.yaml file
-                            def newDeploymentFileContent = writeYaml file: appData.deploymentFile, data: deploymentFileData, overwrite: true, returnText: true
+                            def newDeploymentFileContent = writeYaml file: appData.deploymentFile, data: deploymentFileData, overwrite: true
 
-                            echo "${appLabel} Deployment file contents are: ${newDeploymentFileContent}"
+                            echo "${appLabel} Deployment file has been updated"
+                            sh "cat ${appData.deploymentFile}"
                         }
                     }
 
