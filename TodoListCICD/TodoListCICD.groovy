@@ -22,7 +22,7 @@ def applicationValues = [
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'KubernetesPod.yaml'
+            yamlFile 'TodoListCICD/KubernetesPod.yaml'
             defaultContainer 'shell'
         }
     }
