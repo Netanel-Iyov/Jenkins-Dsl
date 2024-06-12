@@ -132,29 +132,31 @@ pipeline {
         stage('Update Deployment files') {
             steps {
                 dir('argocd-todolist') {
-                    applicationValues.each { appLabel, appData ->
-                        if (!appData.toDeploy) {
-                            echo "Skipping ${appLabel} Deployment"
-                        }
-
-                        // Read the deployment.yaml file into deploymentFileData
-                        def deploymentFileData = readYaml file: appData.deploymentFile
-                        
-                        // Define the regex pattern for the image
-                        def pattern = appData.imagePattern
-                        
-                        // Iterate over the containers and update the image for the specified container
-                        def containers = deploymentFileData.spec.template.spec.containers
-                        containers.each { container ->
-                            if (container.image ==~ pattern) {
-                                container.image = appData.tag
+                    script {
+                        applicationValues.each { appLabel, appData ->
+                            if (!appData.toDeploy) {
+                                echo "Skipping ${appLabel} Deployment"
                             }
-                        }
-                        
-                        // Write the modified deploymentFileData back to the deployment.yaml file
-                        def newDeploymentFileContent = writeYaml file: appData.deploymentFile, data: deploymentFileData, overwrite: true, returnText: true
 
-                        echo "${appLabel} Deployment file contents are: ${newDeploymentFileContent}"
+                            // Read the deployment.yaml file into deploymentFileData
+                            def deploymentFileData = readYaml file: appData.deploymentFile
+                            
+                            // Define the regex pattern for the image
+                            def pattern = appData.imagePattern
+                            
+                            // Iterate over the containers and update the image for the specified container
+                            def containers = deploymentFileData.spec.template.spec.containers
+                            containers.each { container ->
+                                if (container.image ==~ pattern) {
+                                    container.image = appData.tag
+                                }
+                            }
+                            
+                            // Write the modified deploymentFileData back to the deployment.yaml file
+                            def newDeploymentFileContent = writeYaml file: appData.deploymentFile, data: deploymentFileData, overwrite: true, returnText: true
+
+                            echo "${appLabel} Deployment file contents are: ${newDeploymentFileContent}"
+                        }
                     }
 
                     // commit and push
