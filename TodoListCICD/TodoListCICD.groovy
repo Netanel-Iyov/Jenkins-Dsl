@@ -10,7 +10,7 @@ def applicationValues = [
             'imagePattern': ~/natiiyov\/todo-list-api:\d+\.\d+\.\d+/
             ], 
     'client' : [
-                'workdir': 'client'
+                'workdir': 'client',
                 'versionFile': './client/metadata.json',
                 'changesFilesRegex': 'client/*',
                 'imageName': 'natiiyov/todo-list-client',
