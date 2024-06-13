@@ -1,10 +1,11 @@
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
+import groovy.json.JsonSlurper
 
 def applicationValues = [
     'api' : [
             'workdir': 'api',
             'versionFile': './api/metadata.json',
-            'changesFilesRegex': 'api/*',
+            'changedFilesPrefix': 'api/',
             'imageName': 'natiiyov/todo-list-api',
             'deploymentFile': 'api/deployment.yaml',
             'imagePattern': ~/natiiyov\/todo-list-api:\d+\.\d+\.\d+/
@@ -12,7 +13,7 @@ def applicationValues = [
     'client' : [
                 'workdir': 'client',
                 'versionFile': './client/metadata.json',
-                'changesFilesRegex': 'client/*',
+                'changedFilesPrefix': 'client/',
                 'imageName': 'natiiyov/todo-list-client',
                 'deploymentFile': 'client/deployment.yaml',
                 'imagePattern': ~/natiiyov\/todo-list-client:\d+\.\d+\.\d+/
@@ -78,14 +79,27 @@ spec:
                 container('docker') {
                     dir('Todo-list') {
                         script {
+                            List allFilesChanged = []
+                            List jsonLists = [ADDED_FILES, REMOVED_FILES, MODIFIED_FILES]
+                            JsonSlurper jsonSlurper = new JsonSlurper()
+                            
+                            jsonLists.each{ jsonList ->
+                                allFilesChanged.addAll(jsonSlurper.parseText(jsonList))
+                            }
+                            
+                            echo "Changed Files: ${allFilesChanged}"
+                            
                             applicationValues.each { appLabel, appData ->
                                 def jsonFile = readFile(file: appData.versionFile)
                                 def jsonData = readJSON(text: jsonFile)
     
                                 def version = jsonData.version
-    
+                                def changedFilesMatched = false
+
                                 // check if changed files match 
-                                def changedFilesMatched = true
+                                allFilesChanged.each { file -> 
+                                    changedFilesMatched = file.startsWith(appData.changedFilesPrefix) ? true : changedFilesMatched
+                                }
                                 def imageTag = "${appData.imageName}:${version}"
                                 
                                 withCredentials([usernamePassword(credentialsId: 'DockerHub-Credentials', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
