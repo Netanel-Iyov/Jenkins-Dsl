@@ -24,12 +24,12 @@ pipelineJob('Todo-List-CICD') {
             regexpFilterText("\$REF")
             regexpFilterExpression("refs/heads/test-CICD")
         }
-
     }
 
     definition {
         cps {
             script(readFileFromWorkspace("./TodoListCICD/TodoListCICD.groovy"))
+            sandbox()
         }
     }
 }
