@@ -79,14 +79,19 @@ spec:
                 container('docker') {
                     dir('Todo-list') {
                         script {
-                            List allFilesChanged = []
-                            List jsonLists = [ADDED_FILES, REMOVED_FILES, MODIFIED_FILES]
-                            JsonSlurper jsonSlurper = new JsonSlurper()
-                            
-                            jsonLists.each{ jsonList ->
-                                allFilesChanged.addAll(jsonSlurper.parseText(jsonList))
+                            // Define a method to process files and extract version information
+                            def processFilesAndExtractVersions = {
+                                List allFilesChanged = []
+                                List jsonLists = [ADDED_FILES, REMOVED_FILES, MODIFIED_FILES]
+                                jsonLists.each { jsonList ->
+                                    def jsonSlurper = new groovy.json.JsonSlurper()
+                                    allFilesChanged.addAll(jsonSlurper.parseText(jsonList))
+                                }
+                                return allFilesChanged
                             }
                             
+                            // Call the method to get the changed files
+                            def allFilesChanged = processFilesAndExtractVersions()
                             echo "Changed Files: ${allFilesChanged}"
                             
                             applicationValues.each { appLabel, appData ->
@@ -110,7 +115,7 @@ spec:
                                         appData['tag'] = imageTag
                                     } else {
                                         appData['toDeploy'] = false
-                                        sh "echo 'Tag ${imageTag} already exist in docker registry. Please make sure you didnt forget to update the version in ${versionFile}'"
+                                        echo "Tag ${imageTag} already exist in docker registry. Please make sure you didnt forget to update the version in ${appData.versionFile}"
                                     }
                                 }
                             }
