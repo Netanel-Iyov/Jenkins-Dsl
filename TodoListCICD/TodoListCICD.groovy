@@ -234,7 +234,7 @@ spec:
                             git add .
 
                             git commit -m 'Commit by Jenkins CI CD Pipeline'
-                            git push
+                            git push --set-upstream origin main
                             """
                         }
                     }
