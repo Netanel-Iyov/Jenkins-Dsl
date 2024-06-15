@@ -68,13 +68,6 @@ spec:
         }
 
         stage ('Verify Versions') {
-            // Check github triggers and regexes
-            // 1. define the api and client tags, for example: 'natiiyov/todo-list-client:1.0.0'
-            // 2. get changed files and sort by /api, /client
-            // 3. extract versions from the versions.json file in the repository
-            // 4. for each tag see if changed files in the relevant directory, if changed check version
-            // 5. if both tags are valid then continue the pipeline.
-            // 6. if not valid, then notify somehow and exit the pipeline with Failed status code
             steps {
                 container('docker') {
                     dir('Todo-list') {
@@ -90,6 +83,7 @@ spec:
                                 return allFilesChanged
                             }
                             
+                            def proceedToDeployment = false
                             // Call the method to get the changed files
                             def allFilesChanged = processFilesAndExtractVersions()
                             echo "Changed Files: ${allFilesChanged}"
@@ -112,12 +106,18 @@ spec:
                                 
                                     if (changedFilesMatched && !isImageExist) {
                                         appData['toDeploy'] = true
+                                        proceedToDeployment = true
                                         appData['tag'] = imageTag
                                     } else {
                                         appData['toDeploy'] = false
                                         echo "Tag ${imageTag} already exist in docker registry. Please make sure you didnt forget to update the version in ${appData.versionFile}"
                                     }
                                 }
+                            }
+
+                            if (!proceedToDeployment) {
+                                currentBuild.result = 'ABORTED'
+                                error('Changed Files indicate there is no change in the api or client applications... Aborting the build.')
                             }
                         }
                     }
@@ -207,7 +207,9 @@ spec:
                         }
                     }
 
-                    // commit and push
+                    withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials', gitToolName: 'Default')]) {
+                        sh 'git checkout -b CICD-test && git commit -a "testing CI CD pipeline" && git push --set-upstream origin CICD-test'
+                    }
                 }
             }
         }
