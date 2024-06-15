@@ -215,7 +215,13 @@ spec:
                         }
 
                         withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials', gitToolName: 'Default')]) {
-                            sh 'git add . && git commit -m "Testing CI CD pipeline" && git checkout -b CICD-test && git push --set-upstream origin CICD-test'
+                            sh """
+                            git config --global --add ${pwd()}
+                            git add .
+                            git commit -m 'Testing CI CD pipeline'
+                            git checkout -b CICD-test
+                            git push --set-upstream origin CICD-test
+                            """
                         }
                     }
                 }
