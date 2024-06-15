@@ -144,7 +144,7 @@ spec:
                             if (applicationValues.api.toDeploy) {
                                 docker.withRegistry('https://registry.hub.docker.com', 'DockerHub-Credentials') {
                                     def dockerImage = docker.build(applicationValues.api.tag, "-f Dockerfile.prod .")
-                                    dockerImage.push()
+                                    //dockerImage.push()
                                 }
                             } else {
                                 Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -163,7 +163,7 @@ spec:
                             container('docker') {
                                 docker.withRegistry('https://registry.hub.docker.com', 'DockerHub-Credentials') {
                                     def dockerImage = docker.build(applicationValues.client.tag, "-f Dockerfile.prod .")
-                                    dockerImage.push()
+                                    //dockerImage.push()
                                 }
                             }
                         } else {
@@ -216,7 +216,7 @@ spec:
 
                         withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials', gitToolName: 'Default')]) {
                             sh """
-                            git config --global --add ${pwd()}
+                            git config --global --add safe.directory ${pwd()}
                             git add .
                             git commit -m 'Testing CI CD pipeline'
                             git checkout -b CICD-test
