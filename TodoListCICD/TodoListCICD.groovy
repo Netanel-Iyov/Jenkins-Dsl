@@ -184,39 +184,47 @@ spec:
 
         stage('Update Deployment files') {
             steps {
+                dir('argocd-todolist') {
+                    script {
+                        applicationValues.each { appLabel, appData ->
+                            if (!appData.toDeploy) {
+                                echo "Skipping ${appLabel} Deployment"
+                            }
+
+                            // Read the deployment.yaml file into deploymentFileData
+                            def deploymentFileData = readYaml file: appData.deploymentFile
+                            
+                            // Define the regex pattern for the image
+                            def pattern = appData.imagePattern
+                            
+                            // Iterate over the containers and update the image for the specified container
+                            def containers = deploymentFileData.spec.template.spec.containers
+                            containers.each { container ->
+                                if (container.image ==~ pattern) {
+                                    container.image = appData.tag
+                                }
+                            }
+                            
+                            // Write the modified deploymentFileData back to the deployment.yaml file
+                            def newDeploymentFileContent = writeYaml file: appData.deploymentFile, data: deploymentFileData, overwrite: true
+
+                            echo "${appLabel} Deployment file has been updated"
+                            sh "cat ${appData.deploymentFile}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Push to ArgoCD repository') {
+            steps {
                 container('git') {
                     dir('argocd-todolist') {
-                        script {
-                            applicationValues.each { appLabel, appData ->
-                                if (!appData.toDeploy) {
-                                    echo "Skipping ${appLabel} Deployment"
-                                }
-
-                                // Read the deployment.yaml file into deploymentFileData
-                                def deploymentFileData = readYaml file: appData.deploymentFile
-                                
-                                // Define the regex pattern for the image
-                                def pattern = appData.imagePattern
-                                
-                                // Iterate over the containers and update the image for the specified container
-                                def containers = deploymentFileData.spec.template.spec.containers
-                                containers.each { container ->
-                                    if (container.image ==~ pattern) {
-                                        container.image = appData.tag
-                                    }
-                                }
-                                
-                                // Write the modified deploymentFileData back to the deployment.yaml file
-                                def newDeploymentFileContent = writeYaml file: appData.deploymentFile, data: deploymentFileData, overwrite: true
-
-                                echo "${appLabel} Deployment file has been updated"
-                                sh "cat ${appData.deploymentFile}"
-                            }
-                        }
-
                         withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials', gitToolName: 'Default')]) {
                             sh """
                             git config --global --add safe.directory ${pwd()}
+                            git config --global user.name "Jenkins-CI-CD-Pipeline"
+                            git config --global user.email "jenkins@jenkins.niyov.com"
                             git add .
                             git commit -m 'Testing CI CD pipeline'
                             git checkout -b CICD-test
