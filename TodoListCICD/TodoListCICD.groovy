@@ -28,6 +28,12 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
+    - name: git
+      image: alpine/git:2.45.2
+      command:
+        - sleep
+      args:
+        - infinity
     - name: shell
       image: ubuntu
       command:
@@ -178,37 +184,39 @@ spec:
 
         stage('Update Deployment files') {
             steps {
-                dir('argocd-todolist') {
-                    script {
-                        applicationValues.each { appLabel, appData ->
-                            if (!appData.toDeploy) {
-                                echo "Skipping ${appLabel} Deployment"
-                            }
-
-                            // Read the deployment.yaml file into deploymentFileData
-                            def deploymentFileData = readYaml file: appData.deploymentFile
-                            
-                            // Define the regex pattern for the image
-                            def pattern = appData.imagePattern
-                            
-                            // Iterate over the containers and update the image for the specified container
-                            def containers = deploymentFileData.spec.template.spec.containers
-                            containers.each { container ->
-                                if (container.image ==~ pattern) {
-                                    container.image = appData.tag
+                container('git') {
+                    dir('argocd-todolist') {
+                        script {
+                            applicationValues.each { appLabel, appData ->
+                                if (!appData.toDeploy) {
+                                    echo "Skipping ${appLabel} Deployment"
                                 }
+
+                                // Read the deployment.yaml file into deploymentFileData
+                                def deploymentFileData = readYaml file: appData.deploymentFile
+                                
+                                // Define the regex pattern for the image
+                                def pattern = appData.imagePattern
+                                
+                                // Iterate over the containers and update the image for the specified container
+                                def containers = deploymentFileData.spec.template.spec.containers
+                                containers.each { container ->
+                                    if (container.image ==~ pattern) {
+                                        container.image = appData.tag
+                                    }
+                                }
+                                
+                                // Write the modified deploymentFileData back to the deployment.yaml file
+                                def newDeploymentFileContent = writeYaml file: appData.deploymentFile, data: deploymentFileData, overwrite: true
+
+                                echo "${appLabel} Deployment file has been updated"
+                                sh "cat ${appData.deploymentFile}"
                             }
-                            
-                            // Write the modified deploymentFileData back to the deployment.yaml file
-                            def newDeploymentFileContent = writeYaml file: appData.deploymentFile, data: deploymentFileData, overwrite: true
-
-                            echo "${appLabel} Deployment file has been updated"
-                            sh "cat ${appData.deploymentFile}"
                         }
-                    }
 
-                    withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials', gitToolName: 'Default')]) {
-                        sh 'git checkout -b CICD-test && git commit -a "testing CI CD pipeline" && git push --set-upstream origin CICD-test'
+                        withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials', gitToolName: 'Default')]) {
+                            sh 'git add . && git commit -m "Testing CI CD pipeline" && git checkout -b CICD-test && git push --set-upstream origin CICD-test'
+                        }
                     }
                 }
             }
