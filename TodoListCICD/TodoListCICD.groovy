@@ -65,7 +65,7 @@ spec:
             steps {
                 dir('Todo-list') {
                     cleanWs()
-                    git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list', branch: 'test-CICD'
+                    git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list', branch: 'master'
                     script {
                         sh 'echo "Display Checkout content" && ls -la'
                     }
@@ -232,9 +232,9 @@ spec:
                             git config --global user.name "Jenkins-CI-CD-Pipeline"
                             git config --global user.email "jenkins@jenkins.niyov.com"
                             git add .
-                            git commit -m 'Testing CI CD pipeline'
-                            git checkout -b CICD-test
-                            git push --set-upstream origin CICD-test
+
+                            git commit -m 'Commit by Jenkins CI CD Pipeline'
+                            git push
                             """
                         }
                     }
