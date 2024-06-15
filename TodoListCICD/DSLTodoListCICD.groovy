@@ -2,7 +2,7 @@
 pipelineJob('Todo-List-CICD') {
     triggers {
         genericTrigger {
-            token('test-token')
+            token('Todo-List-CICD')
             genericVariables {
                 genericVariable {
                     key("ADDED_FILES")
@@ -22,7 +22,7 @@ pipelineJob('Todo-List-CICD') {
                 }
             }
             regexpFilterText("\$REF")
-            regexpFilterExpression("refs/heads/test-CICD")
+            regexpFilterExpression("refs/heads/master")
         }
     }
 

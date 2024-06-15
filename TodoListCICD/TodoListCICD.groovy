@@ -144,7 +144,7 @@ spec:
                             if (applicationValues.api.toDeploy) {
                                 docker.withRegistry('https://registry.hub.docker.com', 'DockerHub-Credentials') {
                                     def dockerImage = docker.build(applicationValues.api.tag, "-f Dockerfile.prod .")
-                                    //dockerImage.push()
+                                    dockerImage.push()
                                 }
                             } else {
                                 Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -161,9 +161,15 @@ spec:
                     script {
                         if (applicationValues.client.toDeploy) {
                             container('docker') {
+                                // Use withCredentials to retrieve the secret file
+                                withCredentials([file(credentialsId: 'Todo-List-React-.env-File', variable: 'ENV_FILE')]) {
+                                    // Copy the secret file to the desired location in the workspace
+                                    sh "cp \$ENV_FILE ./.env.prod"
+                                }
+                                
                                 docker.withRegistry('https://registry.hub.docker.com', 'DockerHub-Credentials') {
                                     def dockerImage = docker.build(applicationValues.client.tag, "-f Dockerfile.prod .")
-                                    //dockerImage.push()
+                                    dockerImage.push()
                                 }
                             }
                         } else {
