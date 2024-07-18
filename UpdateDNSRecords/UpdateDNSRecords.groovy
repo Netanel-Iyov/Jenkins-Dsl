@@ -36,6 +36,12 @@ spec:
             }
         }
 
+        stage('Debug') {
+            steps {
+                sh 'pwd && ls -la .'
+            }
+        }
+
         stage('Update DNS') {
             steps {
                 dir('Home-Server') {
