@@ -40,10 +40,11 @@ spec:
             steps {
                 dir('Home-Server/update_DNS_records') {
                     withCredentials([string(credentialsId: 'Cloudflare-Global-API-Key', variable: 'API_KEY')]) {
-                    sh """
+                    sh '''
+                        ls -la .
                         pip install -r requirements.txt
-                        python ./update_DNS_record.py --api-key ${API_KEY} --email nati16368447@gmail.com --hostnames ${}
-                    """
+                        python ./update_DNS_record.py --api-key $API_KEY --email nati16368447@gmail.com --hostnames ${}
+                    '''
                     }
                 }
             }
