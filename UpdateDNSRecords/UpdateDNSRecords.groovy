@@ -20,7 +20,7 @@ spec:
 
     parameters {
         string(name: 'BRANCH', description: 'Git branch to checkout on', defaultValue: 'main')
-        string(name: 'RECORD_NAMES', description: 'Select Record Names (seperated by space)', defaultValue: '@ jenkins argocd')
+        string(name: 'RECORD_NAMES', description: 'Select Record Names (seperated by space)', defaultValue: 'jenkins.niyov.com argocd.niyov.com todo-list.niyov.com api-todo-list.niyov.com')
     }
     
     triggers {
@@ -38,11 +38,13 @@ spec:
 
         stage('Update DNS') {
             steps {
-                withCredentials([string(credentialsId: 'go-daddy-api-key', variable: 'api_key'), string(credentialsId: 'go-daddy-api-secret', variable: 'api_secret') ]) 
-                {
-                    sh """pip install requests
-                    python3 ./misc/update_DNS_record.py --domain niyov.com --record-names ${RECORD_NAMES} --api-key ${api_key} --api-secret ${api_secret}
+                dir('Home-Server/update_DNS_records') {
+                    withCredentials([string(credentialsId: 'Cloudflare-Global-API-Key', variable: 'API_KEY')]) {
+                    sh """
+                        pip install -r requirements.txt
+                        python ./update_DNS_record.py --api-key ${API_KEY} --email nati16368447@gmail.com --hostnames ${}
                     """
+                    }
                 }
             }
         }
