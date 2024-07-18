@@ -36,20 +36,14 @@ spec:
             }
         }
 
-        stage('Debug') {
-            steps {
-                sh 'pwd && ls -la .'
-            }
-        }
-
         stage('Update DNS') {
             steps {
-                dir('Home-Server') {
+                dir('update_DNS_records') {
                     withCredentials([string(credentialsId: 'Cloudflare-Global-API-Key', variable: 'API_KEY')]) {
                     sh '''
                         ls -la .
-                        pip install -r ./update_DNS_records/requirements.txt
-                        python ./update_DNS_records/update_DNS_record.py --api-key $API_KEY --email nati16368447@gmail.com --hostnames $RECORD_NAMES
+                        pip install -r ./requirements.txt
+                        python ./update_DNS_record.py --api-key $API_KEY --email nati16368447@gmail.com --hostnames $RECORD_NAMES
                     '''
                     }
                 }
