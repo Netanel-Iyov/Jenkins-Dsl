@@ -1,5 +1,9 @@
 // Uses Declarative syntax to run commands inside a container.
 pipeline {
+    parameters {
+        string(name: 'REF', description: 'Push Event Branch Ref')
+    }
+
     agent {
         kubernetes {
             yaml '''
