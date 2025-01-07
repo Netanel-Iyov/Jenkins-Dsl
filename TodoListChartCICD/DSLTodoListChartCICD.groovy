@@ -1,5 +1,8 @@
 // Uses Declarative syntax to run commands inside a container.
-pipelineJob('Todo-List-CICD') {
+
+def jobName = BRANCH == 'main' ? 'Todo-List-Chart-CICD' : 'Testing/Todo-List-Chart-CICD'
+
+pipelineJob(jobName) {
     triggers {
         genericTrigger {
             token('Todo-List-CICD')
