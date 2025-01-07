@@ -25,7 +25,7 @@ spec:
 
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: '*/${BRANCH}']],
+                    branches: [[name: "*/${BRANCH}"]],
                     userRemoteConfigs: [
                         [ 
                             url: "https://github.com/Netanel-Iyov/Jenkins-Dsl.git",
