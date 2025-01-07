@@ -2,21 +2,23 @@
 def jobName = 'Todo-List-Chart-CICD'
 def fullJobName = PRODUCTION_ENV == 'true' ? jobName : "${JOBS_BASE_PATH}/${jobName}"
 pipelineJob(fullJobName) {
-    triggers {
-        genericTrigger {
-            token('Todo-List-CICD')
-            genericVariables {
-                genericVariable {
-                    key("ACTION")
-                    value("\$.action")
+    if (PRODUCTION_ENV == 'true') {
+        triggers {
+            genericTrigger {
+                token('Todo-List-CICD')
+                genericVariables {
+                    genericVariable {
+                        key("ACTION")
+                        value("\$.action")
+                    }
+                    genericVariable {
+                        key("RELEASE_TAG")
+                        value("\$.release.tag_name")
+                    }
                 }
-                genericVariable {
-                    key("RELEASE_TAG")
-                    value("\$.release.tag_name")
-                }
+                regexpFilterText("\$ACTION")
+                regexpFilterExpression("prereleased|released")
             }
-            regexpFilterText("\$ACTION")
-            regexpFilterExpression("prereleased|released")
         }
     }
 
