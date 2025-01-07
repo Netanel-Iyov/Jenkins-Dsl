@@ -39,11 +39,17 @@ spec:
     }
 
     stages {
+        stage('Debug') {
+            steps {
+                echo "${env.ACTION}"
+                echo "${env.RELEASE_TAG}"
+            }
+        }
         stage('Checkout') {
             steps {
                 dir('Todo-list') {
                     cleanWs()
-                    checkout scmGit(branches: [[name: 'refs/tags/${tag}']], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
+                    checkout scmGit(branches: [[name: 'refs/tags/${RELEASE_TAG}']], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
                     script {
                         sh 'echo "Display Checkout content" && ls -la'
                     }

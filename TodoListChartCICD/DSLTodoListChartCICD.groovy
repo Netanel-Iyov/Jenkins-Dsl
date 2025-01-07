@@ -7,12 +7,16 @@ pipelineJob(fullJobName) {
             token('Todo-List-CICD')
             genericVariables {
                 genericVariable {
-                    key("release_tag")
+                    key("ACTION")
+                    value("\$.action")
+                }
+                genericVariable {
+                    key("RELEASE_TAG")
                     value("\$.tag_name")
                 }
             }
-            // regexpFilterText("\$action")
-            // regexpFilterExpression("prereleased|released")
+            regexpFilterText("\$ACTION")
+            regexpFilterExpression("prereleased|released")
         }
     }
 

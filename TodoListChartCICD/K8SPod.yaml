@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    foo: bar
+spec:
+  containers:
+    - name: Todo-List-CI-CD-Agent
+      image: harbor.niyov.com/jenkins-agents/todo-list-ci-cd:latest
+      imagePullPolicy: Always
+      volumeMounts:
+        - mountPath: /workspace
+          name: workspace-volume
+  volumes:
+    - name: workspace-volume
+      emptyDir: {}
