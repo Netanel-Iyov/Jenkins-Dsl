@@ -1,13 +1,11 @@
 pipeline {
-    node {
-      agent {
-          kubernetes {
-              yamlFile 'TodoListChartCICD/K8SPod.yaml'
-              defaultContainer 'shell'
-          }
-      }
+    agent {
+        kubernetes {
+            yamlFile 'TodoListChartCICD/K8SPod.yaml'
+            defaultContainer 'shell'
+        }
     }
-
+    
     stages {
         stage('Checkout') {
             steps {
