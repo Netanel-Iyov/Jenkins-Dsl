@@ -1,8 +1,7 @@
 // Uses Declarative syntax to run commands inside a container.
-
-def jobName = BRANCH == 'main' ? 'Todo-List-Chart-CICD' : 'Testing/Todo-List-Chart-CICD'
-
-pipelineJob(jobName) {
+def jobName = 'Todo-List-Chart-CICD'
+def fullJobName = productionEnv == 'true' ? jobName : "${JOBS_BASE_PATH}/${jobName}"
+pipelineJob(fullJobName) {
     triggers {
         genericTrigger {
             token('Todo-List-CICD')
@@ -12,8 +11,8 @@ pipelineJob(jobName) {
                     value("\$.tag_name")
                 }
             }
-            regexpFilterText("\$action")
-            regexpFilterExpression("prereleased|released")
+            // regexpFilterText("\$action")
+            // regexpFilterExpression("prereleased|released")
         }
     }
 
