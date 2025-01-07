@@ -8,11 +8,11 @@ pipelineJob(fullJobName) {
             genericVariables {
                 genericVariable {
                     key("ACTION")
-                    value("\$.release.action")
+                    value("\$.action")
                 }
                 genericVariable {
                     key("RELEASE_TAG")
-                    value("\$.tag_name")
+                    value("\$.release.tag_name")
                 }
             }
             regexpFilterText("\$ACTION")
