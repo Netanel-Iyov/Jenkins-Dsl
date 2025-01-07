@@ -1,6 +1,6 @@
 // Uses Declarative syntax to run commands inside a container.
 def jobName = 'Todo-List-Chart-CICD'
-def fullJobName = productionEnv == 'true' ? jobName : "${JOBS_BASE_PATH}/${jobName}"
+def fullJobName = PRODUCTION_ENV == 'true' ? jobName : "${JOBS_BASE_PATH}/${jobName}"
 pipelineJob(fullJobName) {
     triggers {
         genericTrigger {
