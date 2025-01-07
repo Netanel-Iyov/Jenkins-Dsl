@@ -8,7 +8,7 @@ pipelineJob(fullJobName) {
             genericVariables {
                 genericVariable {
                     key("ACTION")
-                    value("\$.action")
+                    value("\$.release.action")
                 }
                 genericVariable {
                     key("RELEASE_TAG")
