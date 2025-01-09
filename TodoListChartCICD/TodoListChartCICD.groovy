@@ -45,11 +45,12 @@ spec:
                     env.DOCKER_REGISTRY = 'https://harbor.niyov.com'
                     env.DOCKER_REGISTRY_CREDENTIALS = 'Private-Harbor-Credentials'
                     env.DOCKER_REPOSITORY = 'harbor.niyov.com/applications'
+
                     switch(env.ACTION) {
                         case 'released':
                             env.RELEASE_ENVIRONMENT = 'production'
                             break
-                        case 'released':
+                        case 'prereleased':
                             env.RELEASE_ENVIRONMENT = 'staging' 
                             break
                         case null:
