@@ -4,26 +4,22 @@ pipeline {
             yamlFile '''
 apiVersion: v1
 kind: Pod
+metadata:               
+  name: multi-container 
 spec:
   containers:
     - name: git
       image: alpine/git:2.45.2
-      command:
-        - sleep
-      args:
-        - infinity
+      command: ["sleep"] # Fixed array syntax
+      args: ["infinity"]
     - name: shell
       image: ubuntu
-      command:
-        - sleep
-      args:
-        - infinity
+      command: ["sleep"]
+      args: ["infinity"]
     - name: docker
       image: docker:latest
-      command:
-        - "sleep"
-      args:
-        - "99d"
+      command: ["sleep"]
+      args: ["99d"]
       volumeMounts:
         - name: docker-daemon
           mountPath: /var/run/docker.sock
