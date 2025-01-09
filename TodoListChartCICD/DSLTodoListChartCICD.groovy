@@ -17,7 +17,7 @@ pipelineJob(fullJobName) {
                     }
                 }
                 regexpFilterText("\$ACTION")
-                regexpFilterExpression("prereleased|released")
+                regexpFilterExpression("released|prereleased")
             }
         }
     //}
