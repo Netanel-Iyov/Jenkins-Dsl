@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            yamlFile '''
+            yaml '''
 apiVersion: v1
 kind: Pod
 spec:
@@ -33,11 +33,11 @@ spec:
       hostPath:
         path: /var/run/docker.sock
         type: Socket
-'''
+            '''
             defaultContainer 'shell'
         }
     }
-    
+
     stages {
         stage('Setup') {
             steps {
