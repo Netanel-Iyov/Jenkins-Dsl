@@ -47,7 +47,7 @@ spec:
                     env.DOCKER_REPOSITORY = 'harbor.niyov.com/applications'
                     switch(env.ACTION) {
                         case 'released':
-                            env.RELEASE_ENVIRONMENT = 'production' 
+                            env.RELEASE_ENVIRONMENT = 'production'
                             break
                         case 'released':
                             env.RELEASE_ENVIRONMENT = 'staging' 
@@ -56,14 +56,16 @@ spec:
                             env.RELEASE_ENVIRONMENT = 'testing'
                             break
                     }
-                }
-            }
-        }
 
-        stage ('Debug env var settings') {
-            steps {
-                script {
-                    sh 'env'
+                    // Verify tag version
+                    if (env.RELEASE_ENVIRONMENT == 'staging' || env.RELEASE_ENVIRONMENT == 'production') {
+                        def pattern = ~/^v\d+\.\d+\.\d+$/
+                        def validVersion = env.RELEASE_TAG ==~ pattern
+                        if (!validVersion)
+                            error 'Not a Valid Version! Please fix the release/prerelease in Github.'
+                    }
+
+                    env.IMAGE_TAG = env.RELEASE_TAG.substring(1)
                 }
             }
         }
@@ -81,45 +83,52 @@ spec:
             }
         }
 
-        // stage("Build API & Push To Registry") {
-        //     steps {
-        //         dir("Todo-list/api") {
-        //             script {
-        //                 container('docker') {
-        //                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-        //                         def tagPrefix = [
-        //                             'released': '',
-        //                             'prereleased': '-staging'
-        //                         ]
-        //                         def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.ACTION]}:${RELEASE_TAG}"
-        //                         def dockerImage = docker.build(imageTag, "-f Dockerfile.prod .")
-        //                         dockerImage.push()
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Build') {
+            parallel {
+                stage("Build API & Push To Registry") {
+                    steps {
+                        dir("Todo-list/api") {
+                            script {
+                                container('docker') {
+                                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
+                                        def tagPrefix = [
+                                            'production': '',
+                                            'staging': '-staging',
+                                            'testing': '-testing'
+                                        ]
+                                        def imageTag = "${DOCKER_REPOSITORY}/todo-list-api${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
+                                        def dockerImage = docker.build(imageTag, "-f Dockerfile.prod .")
+                                        dockerImage.push()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         // stage("Build Client & Push To Registry") {
         //     steps {
         //         dir("Todo-list/client") {
         //             script {
-        //                 if (applicationValues.client.toDeploy) {
-        //                     container('docker') {
-        //                         // Use withCredentials to retrieve the secret file
-        //                         withCredentials([file(credentialsId: 'Todo-List-React-.env-File', variable: 'ENV_FILE')]) {
-        //                             // Copy the secret file to the desired location in the workspace
-        //                             sh "cp \$ENV_FILE ./.env.prod"
-        //                         }
-                                
-        //                         docker.withRegistry('https://registry.hub.docker.com', 'DockerHub-Credentials') {
-        //                             def dockerImage = docker.build(applicationValues.client.tag, "-f Dockerfile.prod .")
-        //                             dockerImage.push()
-        //                         }
+        //                 container('docker') {
+        //                     // Use withCredentials to retrieve the secret file
+        //                     withCredentials([file(credentialsId: 'Todo-List-React-.env-File', variable: 'ENV_FILE')]) {
+        //                         // Copy the secret file to the desired location in the workspace
+        //                         sh "cp \$ENV_FILE ./.env.prod"
         //                     }
-        //                 } else {
-        //                     Utils.markStageSkippedForConditional(STAGE_NAME)
+        //                     def tagPrefix = [
+        //                         'production': '',
+        //                         'staging': '-staging',
+        //                         'testing': '-testing'
+        //                     ]
+        //                     def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
+        //                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
+        //                         def dockerImage = docker.build(imageTag, "-f Dockerfile.prod .")
+        //                         dockerImage.push()
+        //                     }
         //                 }
         //             }
         //         }
