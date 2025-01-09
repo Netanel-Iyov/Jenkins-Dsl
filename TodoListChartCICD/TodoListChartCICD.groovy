@@ -64,9 +64,8 @@ spec:
                         def validVersion = env.RELEASE_TAG ==~ pattern
                         if (!validVersion)
                             error "RELEASE_TAG: ${RELEASE_TAG} is Not a Valid Version! Please fix the release/prerelease in Github."
-                    }
-
-                    env.IMAGE_TAG = env.RELEASE_TAG.substring(1)
+                        env.IMAGE_TAG = env.RELEASE_TAG.substring(1)
+                    } 
                 }
             }
         }
@@ -78,7 +77,11 @@ spec:
                         cleanWs()
                         def ref = RELEASE_ENVIRONMENT == 'testing' ? "refs/heads/${params.BRANCH}" : "refs/tags/${RELEASE_TAG}"
                         checkout scmGit(branches: [[name: ref]], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
-                        sh 'echo "Display Checkout content" && ls -la'
+                        
+                        // set the image tag to be the commit hash in case of testing env deployment
+                        if (RELEASE_ENVIRONMENT == 'testing') {
+                            env.IMAGE_TAG = sh('git rev-parse HEAD', returnStdout: true).trim() 
+                        }
                     }
                 }
             }
@@ -99,7 +102,9 @@ spec:
                                         ]
                                         def imageTag = "${DOCKER_REPOSITORY}/todo-list-api${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
                                         def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        dockerImage.push()
+                                        // dockerImage.push()
+
+                                        env.API_TAG = imageTag
                                     }
                                 }
                             }
@@ -132,7 +137,9 @@ spec:
                                     def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
                                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
                                         def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        dockerImage.push()
+                                        // dockerImage.push()
+
+                                        env.CLIENT_TAG = imageTag
                                     }
                                 }
                             }
@@ -142,13 +149,40 @@ spec:
             }
         }
 
-        // stage('Checkout ArgoCD Repository') {
-        //     steps {
-        //         dir('argocd-todolist') {
-        //             git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/todolist-argocd', branch: 'main'
-        //         }
-        //     }
-        // }
+        stage('Checkout Todo-List Chart Repository') {
+            steps {
+                dir('Todo-List-Chart') {
+                    git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-List-Chart.git', branch: 'main'
+                }
+            }
+        }
 
+        stage('Update ArgoCD Files') {
+            steps {
+                dir('ArgoCD-GitOps/todo-list-app') {
+                    script {
+                        def fileToUpdateMap = [
+                            'production': 'values-prod.yaml',
+                            'staging': 'values-staging.yaml',
+                            'testing': 'values-testing.yaml'
+                        ]
+
+                        // Read the YAML file into a string
+                        def fileToUpdate = fileToUpdateMap[env.RELEASE_ENVIRONMENT]
+                        def yamlContent = readFile(fileToUpdate)
+                        
+                        // Replace the image tags using the environment variables
+                        yamlContent = yamlContent.replaceAll("${DOCKER_REPOSITORY}\todo-list-client.*:\\d+\\.\\d+\\.\\d+", env.CLIENT_TAG)
+                        yamlContent = yamlContent.replaceAll("${DOCKER_REPOSITORY}\todo-list-api.*:\\d+\\.\\d+\\.\\d+", env.API_TAG)
+                        
+                        // Write the modified YAML content back to the file
+                        writeFile file: yamlFilePath, text: yamlContent, overwrite: true
+                        
+                        echo "${fileToUpdate} file has been updated with new versions..."
+                        sh "cat ${fileToUpdate}"
+                    }
+                }
+            }
+        }
     }
 }
