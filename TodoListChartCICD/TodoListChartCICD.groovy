@@ -63,7 +63,7 @@ spec:
                         def pattern = ~/^v\d+\.\d+\.\d+$/
                         def validVersion = env.RELEASE_TAG ==~ pattern
                         if (!validVersion)
-                            error 'Not a Valid Version! Please fix the release/prerelease in Github.'
+                            error "RELEASE_TAG: ${RELEASE_TAG} is Not a Valid Version! Please fix the release/prerelease in Github."
                     }
 
                     env.IMAGE_TAG = env.RELEASE_TAG.substring(1)
@@ -98,7 +98,7 @@ spec:
                                             'testing': '-testing'
                                         ]
                                         def imageTag = "${DOCKER_REPOSITORY}/todo-list-api${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
-                                        def dockerImage = docker.build(imageTag, "-f Dockerfile.prod .")
+                                        def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
                                         dockerImage.push()
                                     }
                                 }
@@ -107,34 +107,43 @@ spec:
                     }
                 }
             }
+
+
+            stage("Build Client & Push To Registry") {
+                steps {
+                    dir("Todo-list/client") {
+                        script {
+                            container('docker') {
+                                // Use withCredentials to retrieve the secret file
+                                def envFile = [
+                                    'production': 'Production-Todo-List-React-.env-File',
+                                    'staging': 'Staging-Todo-List-React-.env-File',
+                                    'testing': 'Testing-Todo-List-React-.env-File'
+                                ]
+                                def tagPrefix = [
+                                    'production': '',
+                                    'staging': '-staging',
+                                    'testing': '-testing'
+                                ]
+                                
+                                withCredentials([file(credentialsId: envFile[env.RELEASE_ENVIRONMENT], variable: 'ENV_FILE')]) {
+                                    // Copy the secret file to the desired location in the workspace
+                                    sh "cp \$ENV_FILE ./.env.prod"
+                                }
+
+                                def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
+                                docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
+                                    def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
+                                    dockerImage.push()
+                                }
+                            }
+                        }
+                    }
+                }
+            } 
         }
 
 
-        // stage("Build Client & Push To Registry") {
-        //     steps {
-        //         dir("Todo-list/client") {
-        //             script {
-        //                 container('docker') {
-        //                     // Use withCredentials to retrieve the secret file
-        //                     withCredentials([file(credentialsId: 'Todo-List-React-.env-File', variable: 'ENV_FILE')]) {
-        //                         // Copy the secret file to the desired location in the workspace
-        //                         sh "cp \$ENV_FILE ./.env.prod"
-        //                     }
-        //                     def tagPrefix = [
-        //                         'production': '',
-        //                         'staging': '-staging',
-        //                         'testing': '-testing'
-        //                     ]
-        //                     def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
-        //                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-        //                         def dockerImage = docker.build(imageTag, "-f Dockerfile.prod .")
-        //                         dockerImage.push()
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // } 
 
         // stage('Checkout ArgoCD Repository') {
         //     steps {
