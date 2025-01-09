@@ -161,7 +161,7 @@ spec:
 
         stage('Update ArgoCD Files') {
             steps {
-                dir('ArgoCD-GitOps/todo-list-app') {
+                dir('Todo-List-Chart') {
                     script {
                         def fileToUpdateMap = [
                             'production': 'values-prod.yaml',
