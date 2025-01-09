@@ -125,7 +125,7 @@ spec:
                                     'staging': '-staging',
                                     'testing': '-testing'
                                 ]
-                                
+
                                 withCredentials([file(credentialsId: envFile[env.RELEASE_ENVIRONMENT], variable: 'ENV_FILE')]) {
                                     // Copy the secret file to the desired location in the workspace
                                     sh "cp \$ENV_FILE ./.env.prod"
@@ -142,8 +142,6 @@ spec:
                 }
             } 
         }
-
-
 
         // stage('Checkout ArgoCD Repository') {
         //     steps {
