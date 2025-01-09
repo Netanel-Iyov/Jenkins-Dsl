@@ -106,41 +106,40 @@ spec:
                         }
                     }
                 }
-            }
+            
+                stage("Build Client & Push To Registry") {
+                    steps {
+                        dir("Todo-list/client") {
+                            script {
+                                container('docker') {
+                                    // Use withCredentials to retrieve the secret file
+                                    def envFile = [
+                                        'production': 'Production-Todo-List-React-.env-File',
+                                        'staging': 'Staging-Todo-List-React-.env-File',
+                                        'testing': 'Testing-Todo-List-React-.env-File'
+                                    ]
+                                    def tagPrefix = [
+                                        'production': '',
+                                        'staging': '-staging',
+                                        'testing': '-testing'
+                                    ]
 
+                                    withCredentials([file(credentialsId: envFile[env.RELEASE_ENVIRONMENT], variable: 'ENV_FILE')]) {
+                                        // Copy the secret file to the desired location in the workspace
+                                        sh "cp \$ENV_FILE ./.env.prod"
+                                    }
 
-            stage("Build Client & Push To Registry") {
-                steps {
-                    dir("Todo-list/client") {
-                        script {
-                            container('docker') {
-                                // Use withCredentials to retrieve the secret file
-                                def envFile = [
-                                    'production': 'Production-Todo-List-React-.env-File',
-                                    'staging': 'Staging-Todo-List-React-.env-File',
-                                    'testing': 'Testing-Todo-List-React-.env-File'
-                                ]
-                                def tagPrefix = [
-                                    'production': '',
-                                    'staging': '-staging',
-                                    'testing': '-testing'
-                                ]
-
-                                withCredentials([file(credentialsId: envFile[env.RELEASE_ENVIRONMENT], variable: 'ENV_FILE')]) {
-                                    // Copy the secret file to the desired location in the workspace
-                                    sh "cp \$ENV_FILE ./.env.prod"
-                                }
-
-                                def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
-                                docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-                                    def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                    dockerImage.push()
+                                    def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
+                                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
+                                        def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
+                                        dockerImage.push()
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            } 
+                } 
+            }
         }
 
         // stage('Checkout ArgoCD Repository') {
