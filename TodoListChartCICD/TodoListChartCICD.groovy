@@ -68,17 +68,18 @@ spec:
             }
         }
 
-        // stage('Checkout') {
-        //     steps {
-        //         dir('Todo-list') {
-        //             cleanWs()
-        //             checkout scmGit(branches: [[name: "refs/tags/${RELEASE_TAG}"]], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
-        //             script {
-        //                 sh 'echo "Display Checkout content" && ls -la'
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Checkout') {
+            steps {
+                dir('Todo-list') {
+                    cleanWs()
+                    def ref = RELEASE_ENVIRONMENT == 'testing' ? "refs/heads/${params.BRANCH}" : "refs/tags/${RELEASE_TAG}"
+                    checkout scmGit(branches: [[name: ref]], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
+                    script {
+                        sh 'echo "Display Checkout content" && ls -la'
+                    }
+                }
+            }
+        }
 
         // stage("Build API & Push To Registry") {
         //     steps {

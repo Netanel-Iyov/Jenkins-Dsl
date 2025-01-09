@@ -22,6 +22,10 @@ pipelineJob(fullJobName) {
         }
     //}
 
+    parameters {
+        stringParam('BRANCH', '', 'Branch to deploy to testing environment')
+    }
+
     definition {
         cps {
             script(readFileFromWorkspace("./TodoListChartCICD/TodoListChartCICD.groovy"))
