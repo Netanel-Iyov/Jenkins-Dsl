@@ -73,10 +73,10 @@ spec:
         stage('Checkout') {
             steps {
                 dir('Todo-list') {
-                    cleanWs()
-                    def ref = RELEASE_ENVIRONMENT == 'testing' ? "refs/heads/${params.BRANCH}" : "refs/tags/${RELEASE_TAG}"
-                    checkout scmGit(branches: [[name: ref]], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
                     script {
+                        cleanWs()
+                        def ref = RELEASE_ENVIRONMENT == 'testing' ? "refs/heads/${params.BRANCH}" : "refs/tags/${RELEASE_TAG}"
+                        checkout scmGit(branches: [[name: ref]], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
                         sh 'echo "Display Checkout content" && ls -la'
                     }
                 }
