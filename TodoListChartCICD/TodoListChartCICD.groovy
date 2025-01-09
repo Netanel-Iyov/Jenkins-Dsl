@@ -151,8 +151,10 @@ spec:
 
         stage('Checkout Todo-List Chart Repository') {
             steps {
-                dir('Todo-List-Chart') {
-                    git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-List-Chart.git', branch: 'main'
+                container('git') {
+                    dir('Todo-List-Chart') {
+                        git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-List-Chart.git', branch: 'main'
+                    }
                 }
             }
         }
