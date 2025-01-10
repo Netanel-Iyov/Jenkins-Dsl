@@ -25,7 +25,7 @@ pipeline {
                             break
                     }
 
-                    def yamlFile = readYaml file: 'vars.yaml'
+                    def yamlFile = readYaml file: 'TodoListChartCICD/vars.yaml'
                     def envVarsToSet = yamlFile['common'] + yamlFile[testing]
 
                     envVarsToSet.each { key, value ->
