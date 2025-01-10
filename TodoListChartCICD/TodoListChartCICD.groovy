@@ -17,12 +17,15 @@ pipeline {
                     switch(env.ACTION) {
                         case 'released':
                             env.RELEASE_ENVIRONMENT = 'production'
+                            currentBuild.displayName = 'Production'
                             break
                         case 'prereleased':
                             env.RELEASE_ENVIRONMENT = 'staging' 
+                            currentBuild.displayName = 'Staging'
                             break
                         case null:
                             env.RELEASE_ENVIRONMENT = 'testing'
+                            currentBuild.displayName = 'Testing'
                             break
                     }
 
