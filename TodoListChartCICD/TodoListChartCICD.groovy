@@ -16,7 +16,7 @@ pipeline {
                             currentBuild.displayName = "#${BUILD_NUMBER} - Production"
                             break
                         case 'prereleased':
-                            c = 'staging' 
+                            env.RELEASE_ENVIRONMENT = 'staging' 
                             currentBuild.displayName = "#${BUILD_NUMBER} - Staging"
                             break
                         case null:
