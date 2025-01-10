@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'K8SPod.yaml'
+            yamlFile 'TodoListChartCICD/K8SPod.yaml'
             defaultContainer 'shell'
         }
     }
