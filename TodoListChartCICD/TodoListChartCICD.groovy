@@ -10,8 +10,6 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
-                    cleanWs()
-
                     def varsFile = 'TodoListChartCICD/utils/vars.yaml'
                     load("TodoListChartCICD/utils/setup.groovy").call(varsFile)
                     sh 'env'
