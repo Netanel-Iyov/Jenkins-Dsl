@@ -10,24 +10,31 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
+                    cleanWs()
+
                     switch(env.ACTION) {
                         case 'released':
                             env.RELEASE_ENVIRONMENT = 'production'
-                            currentBuild.displayName = "#${BUILD_NUMBER} - Production"
+                            currentBuild.displayName = "#${BUILD_NUMBER} - Production - ${RELEASE_TAG}"
+                            env.REVISION = RELEASE_TAG
+                            env.REF = "refs/tags/${RELEASE_TAG}"
                             break
                         case 'prereleased':
                             env.RELEASE_ENVIRONMENT = 'staging' 
-                            currentBuild.displayName = "#${BUILD_NUMBER} - Staging"
+                            currentBuild.displayName = "#${BUILD_NUMBER} - Staging - ${RELEASE_TAG}"
+                            env.REVISION = RELEASE_TAG
+                            env.REF = "refs/tags/${RELEASE_TAG}"
                             break
                         case null:
                             env.RELEASE_ENVIRONMENT = 'testing'
-                            currentBuild.displayName = "#${BUILD_NUMBER} - Testing"
+                            currentBuild.displayName = "#${BUILD_NUMBER} - Testing - ${params.BRANCH}"
+                            env.REVISION = params.BRANCH
+                            env.REF = "refs/heads/${params.BRANCH}"
                             break
                     }
 
                     def varsFile = 'TodoListChartCICD/utils/vars.yaml'
                     load("TodoListChartCICD/utils/setup.groovy").call(varsFile)
-
                     sh 'env'
                 }
             }
@@ -37,9 +44,7 @@ pipeline {
             steps {
                 dir('Todo-list') {
                     script {
-                        cleanWs()
-                        def ref = RELEASE_ENVIRONMENT == 'testing' ? "refs/heads/${params.BRANCH}" : "refs/tags/${RELEASE_TAG}"
-                        checkout scmGit(branches: [[name: ref]], userRemoteConfigs: [[credentialsId: GITHUB_CREDENTIALS_ID, url: 'https://github.com/Netanel-Iyov/Todo-list']])
+                        checkout scmGit(branches: [[name: REF]], userRemoteConfigs: [[credentialsId: GITHUB_CREDENTIALS_ID, url: 'https://github.com/Netanel-Iyov/Todo-list']])
                         
                         // set the image tag to be the commit hash in case of testing env deployment
                         if (RELEASE_ENVIRONMENT == 'testing') {
@@ -60,7 +65,7 @@ pipeline {
                                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
                                         def imageTag = "${API_IMAGE}:${IMAGE_TAG}"
                                         def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        dockerImage.push()
+                                        // dockerImage.push()
 
                                         env.API_TAG = imageTag
                                     }
@@ -84,7 +89,7 @@ pipeline {
                                     def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
                                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
                                         def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        dockerImage.push()
+                                        // dockerImage.push()
 
                                         env.CLIENT_TAG = imageTag
                                     }
@@ -117,8 +122,8 @@ pipeline {
                                     def yamlContent = readFile(HELM_CHART_VALUES_FILE)
                                     
                                     // Replace the image tags using the environment variables
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, env.CLIENT_TAG)
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, env.API_TAG)
+                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, CLIENT_TAG)
+                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, API_TAG)
                                     
                                     // Write the modified YAML content back to the file
                                     writeFile file: HELM_CHART_VALUES_FILE, text: yamlContent
@@ -133,9 +138,10 @@ pipeline {
                                             git config --global user.email "jenkins@jenkins.niyov.com"
                                             git add .
 
-                                            git commit -m 'Jenkins CI-CD Pipeline: Updating ${HELM_CHART_VALUES_FILE}, for ${RELEASE_TAG ?: BRANCH_NAME}'
-                                            git push --set-upstream origin ${HELM_CHART_BRANCH}
+                                            git commit -m 'Jenkins CI-CD Pipeline: Updating ${HELM_CHART_VALUES_FILE}, for ${REVISION}'
+                                            
                                         """
+                                        // git push --set-upstream origin ${HELM_CHART_BRANCH}
                                     }
                                 }
                             }
