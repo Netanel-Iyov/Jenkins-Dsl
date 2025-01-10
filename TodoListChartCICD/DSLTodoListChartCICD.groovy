@@ -30,7 +30,7 @@ pipelineJob(fullJobName) {
         cpsScm {
             scm {
                 git {
-                    branch BRANCH_NAME
+                    branch BRANCH
                     remote {
                         url 'https://github.com/Netanel-Iyov/Jenkins-Dsl.git'
                         credentials('GitHub-Credentials')
