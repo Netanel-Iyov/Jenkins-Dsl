@@ -23,7 +23,7 @@ pipelineJob(fullJobName) {
     //}
 
     parameters {
-        stringParam('BRANCH', '', 'Branch to deploy to testing environment')
+        stringParam('BRANCH', '', 'Branch to deploy to testing environment (only for testing, other environments are triggered via Github webhooks)')
     }
 
     definition {
