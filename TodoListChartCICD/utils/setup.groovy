@@ -20,6 +20,7 @@ def call(String varsFile) {
             break
     }
     
+    // read Env vars from a configuration file
     def yamlFile = readYaml file: varsFile
     def envVarsToSet = yamlFile['common'] + yamlFile[env.RELEASE_ENVIRONMENT]
 
@@ -27,7 +28,7 @@ def call(String varsFile) {
         env[key] = value
     }
 
-    // Verify tag version
+    // Validate tag version for staging and release environments
     if (env.RELEASE_ENVIRONMENT == 'staging' || env.RELEASE_ENVIRONMENT == 'production') {
         def pattern = ~/^v\d+\.\d+\.\d+$/
         def validVersion = env.RELEASE_TAG ==~ pattern
