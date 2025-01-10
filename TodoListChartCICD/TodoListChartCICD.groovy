@@ -174,8 +174,8 @@ spec:
                         def yamlContent = readFile(fileToUpdate)
                         
                         // Replace the image tags using the environment variables
-                        yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\todo-list-client.*:\d+\.\d+\.\d+/, env.CLIENT_TAG)
-                        yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\todo-list-api.*:\d+\.\d+\.\d+/, env.API_TAG)
+                        yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, env.CLIENT_TAG)
+                        yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, env.API_TAG)
                         
                         // Write the modified YAML content back to the file
                         writeFile file: fileToUpdate, text: yamlContent, overwrite: true
