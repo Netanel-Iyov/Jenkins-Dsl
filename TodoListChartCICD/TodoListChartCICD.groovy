@@ -60,7 +60,7 @@ pipeline {
                                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
                                         def imageTag = "${API_IMAGE}:${IMAGE_TAG}"
                                         def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        // dockerImage.push()
+                                        dockerImage.push()
 
                                         env.API_TAG = imageTag
                                     }
@@ -84,7 +84,7 @@ pipeline {
                                     def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
                                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
                                         def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        //dockerImage.push()
+                                        dockerImage.push()
 
                                         env.CLIENT_TAG = imageTag
                                     }
@@ -134,8 +134,8 @@ pipeline {
                                             git add .
 
                                             git commit -m 'Jenkins CI-CD Pipeline: Updating ${HELM_CHART_VALUES_FILE}, for ${RELEASE_TAG ?: BRANCH_NAME}'
+                                            git push --set-upstream origin ${HELM_CHART_BRANCH}
                                         """
-                                        // git push --set-upstream origin ${HELM_CHART_BRANCH}
                                     }
                                 }
                             }
