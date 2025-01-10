@@ -33,7 +33,9 @@ pipeline {
                         if (!validVersion)
                             error "RELEASE_TAG: ${RELEASE_TAG} is Not a Valid Version! Please fix the release/prerelease in Github."
                         env.IMAGE_TAG = env.RELEASE_TAG.substring(1)
-                    } 
+                    }
+
+                    sh 'env'
                 }
             }
         }
