@@ -159,7 +159,7 @@ spec:
             }
         }
 
-        stage('Update ArgoCD Files') {
+        stage('Update Helm Chart Values') {
             steps {
                 dir('Todo-List-Chart') {
                     script {

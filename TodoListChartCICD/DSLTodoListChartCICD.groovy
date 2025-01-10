@@ -27,9 +27,20 @@ pipelineJob(fullJobName) {
     }
 
     definition {
-        cps {
-            script(readFileFromWorkspace("./TodoListChartCICD/TodoListChartCICD.groovy"))
-            sandbox()
+        cpsScm {
+            scm {
+                git {
+                    branch BRANCH_NAME
+                    remote {
+                        url 'https://github.com/Netanel-Iyov/Jenkins-Dsl.git'
+                        credentials('GitHub-Credentials')
+                    }
+                    extensions {
+                        wipeOutWorkspace()
+                    }
+                }
+            }
+            scriptPath('TodoListChartCICD/TodoListChartCICD.groovy')
         }
     }
 }
