@@ -1,0 +1,30 @@
+common:
+  DOCKER_REGISTRY: https://harbor.niyov.com
+  DOCKER_REGISTRY_CREDENTIALS: Private-Harbor-Credentials
+  DOCKER_REPOSITORY: harbor.niyov.com/applications
+  GITHUB_CREDENTIALS_ID: Github-Credentials
+
+production:
+  ref: refs/tags/${RELEASE_TAG}
+  apiImage: harbor.niyov.com/applications/todo-list-api
+  clientImage: harbor.niyov.com/applications/todo-list-client
+  clientEnvFile: Production-Todo-List-React-.env-File
+  helmChartBranch: main
+  helmChartVauesFile: values-prod.yaml
+
+staging:
+  ref: refs/tags/${RELEASE_TAG}
+  apiImage: harbor.niyov.com/applications/todo-list-api-staging
+  clientImage: harbor.niyov.com/applications/todo-list-client-staging
+  clientEnvFile: Staging-Todo-List-React-.env-File
+  helmChartBranch: main
+  helmChartVauesFile: values-staging.yaml
+
+
+testing:
+  ref: refs/heads/${params.BRANCH}
+  apiImage: harbor.niyov.com/applications/todo-list-api-testing
+  clientImage: harbor.niyov.com/applications/todo-list-client-testing
+  clientEnvFile: Testing-Todo-List-React-.env-File
+  helmChartBranch: testing
+  helmChartVauesFile: values-testing.yaml

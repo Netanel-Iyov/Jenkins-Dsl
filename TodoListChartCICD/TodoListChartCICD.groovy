@@ -154,7 +154,7 @@ pipeline {
                                     yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, env.API_TAG)
                                     
                                     // Write the modified YAML content back to the file
-                                    writeFile file: fileToUpdate, text: yamlContent, overwrite: true
+                                    writeFile file: fileToUpdate, text: yamlContent
                                     
                                     echo "${fileToUpdate} file has been updated with new versions..."
                                     sh "cat ${fileToUpdate}"
