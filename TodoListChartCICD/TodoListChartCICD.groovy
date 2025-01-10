@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'TodoListChartCICD/K8SPod.yaml'
+            yamlFile 'TodoListChartCICD/utils/K8SPod.yaml'
             defaultContainer 'shell'
         }
     }
@@ -25,21 +25,8 @@ pipeline {
                             break
                     }
 
-                    def yamlFile = readYaml file: 'TodoListChartCICD/vars.yaml'
-                    def envVarsToSet = yamlFile['common'] + yamlFile[env.RELEASE_ENVIRONMENT]
-
-                    envVarsToSet.each { key, value ->
-                        env[key] = value
-                    }
-
-                    // Verify tag version
-                    if (env.RELEASE_ENVIRONMENT == 'staging' || env.RELEASE_ENVIRONMENT == 'production') {
-                        def pattern = ~/^v\d+\.\d+\.\d+$/
-                        def validVersion = env.RELEASE_TAG ==~ pattern
-                        if (!validVersion)
-                            error "RELEASE_TAG: ${RELEASE_TAG} is Not a Valid Version! Please fix the release/prerelease in Github."
-                        env.IMAGE_TAG = env.RELEASE_TAG.substring(1)
-                    }
+                    def varsFile = 'TodoListChartCICD/utils/vars.yaml'
+                    load("TodoListChartCICD/utils/setup.groovy").call(varsFile)
 
                     sh 'env'
                 }
@@ -56,7 +43,7 @@ pipeline {
                         
                         // set the image tag to be the commit hash in case of testing env deployment
                         if (RELEASE_ENVIRONMENT == 'testing') {
-                            env.IMAGE_TAG = sh('git rev-parse HEAD', returnStdout: true).trim() 
+                            env.IMAGE_TAG = sh('git rev-parse HEAD', returnStdout: true).trim()
                         }
                     }
                 }
@@ -71,11 +58,6 @@ pipeline {
                             script {
                                 container('docker') {
                                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-                                        def tagPrefix = [
-                                            'production': '',
-                                            'staging': '-staging',
-                                            'testing': '-testing'
-                                        ]
                                         def imageTag = "${API_IMAGE}:${IMAGE_TAG}"
                                         def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
                                         // dockerImage.push()
@@ -102,7 +84,7 @@ pipeline {
                                     def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
                                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
                                         def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        // dockerImage.push()
+                                        //dockerImage.push()
 
                                         env.CLIENT_TAG = imageTag
                                     }
@@ -154,7 +136,6 @@ pipeline {
                                             git commit -m 'Jenkins CI-CD Pipeline: Updating ${HELM_CHART_VALUES_FILE}, for ${RELEASE_TAG ?: BRANCH_NAME}'
                                         """
                                         // git push --set-upstream origin ${HELM_CHART_BRANCH}
-
                                     }
                                 }
                             }

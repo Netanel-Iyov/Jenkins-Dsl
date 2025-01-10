@@ -5,7 +5,7 @@ common:
   GITHUB_CREDENTIALS_ID: Github-Credentials
 
 production:
-  REF: refs/tags/${RELEASE_TAG}
+  REF: refs/tags/${RELEASE_TAG} # This is not used, as it requires login for env vars replacement (not implemented yet)
   API_IMAGE: harbor.niyov.com/applications/todo-list-api
   CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client
   CLIENT_ENV_FILE: Production-Todo-List-React-.env-File
@@ -13,7 +13,7 @@ production:
   HELM_CHART_VALUES_FILE: values-prod.yaml
 
 staging:
-  REF: refs/tags/${RELEASE_TAG}
+  REF: refs/tags/${RELEASE_TAG} # This is not used, as it requires login for env vars replacement (not implemented yet)
   API_IMAGE: harbor.niyov.com/applications/todo-list-api-staging
   CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client-staging
   CLIENT_ENV_FILE: Staging-Todo-List-React-.env-File
@@ -22,7 +22,7 @@ staging:
 
 
 testing:
-  REF: refs/heads/${params.BRANCH}
+  REF: refs/heads/${params.BRANCH} # This is not used, as it requires login for env vars replacement (not implemented yet)
   API_IMAGE: harbor.niyov.com/applications/todo-list-api-testing
   CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client-testing
   CLIENT_ENV_FILE: Testing-Todo-List-React-.env-File
