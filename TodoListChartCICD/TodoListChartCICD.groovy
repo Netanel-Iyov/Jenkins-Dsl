@@ -26,12 +26,7 @@ pipeline {
                     }
 
                     def yamlFile = readYaml file: 'TodoListChartCICD/vars.yaml'
-                    def common = yamlFile['common']
-                    def releaseEnvironmentVars = yamlFile[env.RELEASE_ENVIRONMENT]
-
-                    echo "common: ${common}"
-                    echo "releaseEnvironmentVars: ${releaseEnvironmentVars}"
-                    // def envVarsToSet = yamlFile['common'] + yamlFile[env.RELEASE_ENVIRONMENT]
+                    def envVarsToSet = yamlFile['common'] + yamlFile[env.RELEASE_ENVIRONMENT]
 
                     envVarsToSet.each { key, value ->
                         env[key] = value
