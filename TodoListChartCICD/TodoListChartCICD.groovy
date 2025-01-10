@@ -122,39 +122,56 @@ pipeline {
             }
         }
 
-        stage('Checkout Todo-List Chart Repository') {
-            steps {
-                container('git') {
-                    dir('Todo-List-Chart') {
-                        git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-List-Chart.git', branch: 'main'
+        stage('Deploy') {
+            stage('Checkout Todo-List Chart Repository') {
+                steps {
+                    container('git') {
+                        dir('Todo-List-Chart') {
+                            git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-List-Chart.git', branch: 'main'
+                        }
                     }
                 }
             }
-        }
 
-        stage('Update Helm Chart Values') {
-            steps {
-                dir('Todo-List-Chart') {
-                    script {
-                        def fileToUpdateMap = [
-                            'production': 'values-prod.yaml',
-                            'staging': 'values-staging.yaml',
-                            'testing': 'values-testing.yaml'
-                        ]
+            stage('Update Helm Chart Values') {
+                steps {
+                    dir('Todo-List-Chart') {
+                        container('git') {
+                            script {
+                                def fileToUpdateMap = [
+                                    'production': 'values-prod.yaml',
+                                    'staging': 'values-staging.yaml',
+                                    'testing': 'values-testing.yaml'
+                                ]
 
-                        // Read the YAML file into a string
-                        def fileToUpdate = fileToUpdateMap[env.RELEASE_ENVIRONMENT]
-                        def yamlContent = readFile(fileToUpdate)
-                        
-                        // Replace the image tags using the environment variables
-                        yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, env.CLIENT_TAG)
-                        yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, env.API_TAG)
-                        
-                        // Write the modified YAML content back to the file
-                        writeFile file: fileToUpdate, text: yamlContent, overwrite: true
-                        
-                        echo "${fileToUpdate} file has been updated with new versions..."
-                        sh "cat ${fileToUpdate}"
+                                // Read the YAML file into a string
+                                def fileToUpdate = fileToUpdateMap[env.RELEASE_ENVIRONMENT]
+                                def yamlContent = readFile(fileToUpdate)
+                                
+                                // Replace the image tags using the environment variables
+                                yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, env.CLIENT_TAG)
+                                yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, env.API_TAG)
+                                
+                                // Write the modified YAML content back to the file
+                                writeFile file: fileToUpdate, text: yamlContent, overwrite: true
+                                
+                                echo "${fileToUpdate} file has been updated with new versions..."
+                                sh "cat ${fileToUpdate}"
+
+                                withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials')]) {
+                                    sh """
+                                        git config --global --add safe.directory ${pwd()}
+                                        git config --global user.name "Jenkins-CI-CD-Pipeline"
+                                        git config --global user.email "jenkins@jenkins.niyov.com"
+                                        git add .
+
+                                        git commit -m 'Jenkins CI-CD Pipeline: Updating ${fileToUpdate}, for ${RELEASE_TAG ?: BRANCH_NAME}'
+                                    """
+                                    // git push --set-upstream origin main
+
+                                }
+                            }
+                        }
                     }
                 }
             }
