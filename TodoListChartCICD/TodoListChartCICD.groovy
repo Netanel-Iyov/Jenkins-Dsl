@@ -10,23 +10,26 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
-                    env.DOCKER_REGISTRY = 'https://harbor.niyov.com'
-                    env.DOCKER_REGISTRY_CREDENTIALS = 'Private-Harbor-Credentials'
-                    env.DOCKER_REPOSITORY = 'harbor.niyov.com/applications'
-
                     switch(env.ACTION) {
                         case 'released':
                             env.RELEASE_ENVIRONMENT = 'production'
                             currentBuild.displayName = "#${BUILD_NUMBER} - Production"
                             break
                         case 'prereleased':
-                            env.RELEASE_ENVIRONMENT = 'staging' 
+                            c = 'staging' 
                             currentBuild.displayName = "#${BUILD_NUMBER} - Staging"
                             break
                         case null:
                             env.RELEASE_ENVIRONMENT = 'testing'
                             currentBuild.displayName = "#${BUILD_NUMBER} - Testing"
                             break
+                    }
+
+                    def yamlFile = readYaml file: 'vars.yaml'
+                    def envVarsToSet = yamlFile['common'] + yamlFile[testing]
+
+                    envVarsToSet.each { key, value ->
+                        env[key] = value
                     }
 
                     // Verify tag version
@@ -43,140 +46,140 @@ pipeline {
             }
         }
 
-        stage('Checkout') {
-            steps {
-                dir('Todo-list') {
-                    script {
-                        cleanWs()
-                        def ref = RELEASE_ENVIRONMENT == 'testing' ? "refs/heads/${params.BRANCH}" : "refs/tags/${RELEASE_TAG}"
-                        checkout scmGit(branches: [[name: ref]], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
+        // stage('Checkout') {
+        //     steps {
+        //         dir('Todo-list') {
+        //             script {
+        //                 cleanWs()
+        //                 def ref = RELEASE_ENVIRONMENT == 'testing' ? "refs/heads/${params.BRANCH}" : "refs/tags/${RELEASE_TAG}"
+        //                 checkout scmGit(branches: [[name: ref]], userRemoteConfigs: [[credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-list']])
                         
-                        // set the image tag to be the commit hash in case of testing env deployment
-                        if (RELEASE_ENVIRONMENT == 'testing') {
-                            env.IMAGE_TAG = sh('git rev-parse HEAD', returnStdout: true).trim() 
-                        }
-                    }
-                }
-            }
-        }
+        //                 // set the image tag to be the commit hash in case of testing env deployment
+        //                 if (RELEASE_ENVIRONMENT == 'testing') {
+        //                     env.IMAGE_TAG = sh('git rev-parse HEAD', returnStdout: true).trim() 
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Build') {
-            parallel {
-                stage("Build API & Push To Registry") {
-                    steps {
-                        dir("Todo-list/api") {
-                            script {
-                                container('docker') {
-                                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-                                        def tagPrefix = [
-                                            'production': '',
-                                            'staging': '-staging',
-                                            'testing': '-testing'
-                                        ]
-                                        def imageTag = "${DOCKER_REPOSITORY}/todo-list-api${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
-                                        def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        // dockerImage.push()
+        // stage('Build') {
+        //     parallel {
+        //         stage("Build API & Push To Registry") {
+        //             steps {
+        //                 dir("Todo-list/api") {
+        //                     script {
+        //                         container('docker') {
+        //                             docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
+        //                                 def tagPrefix = [
+        //                                     'production': '',
+        //                                     'staging': '-staging',
+        //                                     'testing': '-testing'
+        //                                 ]
+        //                                 def imageTag = "${DOCKER_REPOSITORY}/todo-list-api${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
+        //                                 def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
+        //                                 // dockerImage.push()
 
-                                        env.API_TAG = imageTag
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        //                                 env.API_TAG = imageTag
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
             
-                stage("Build Client & Push To Registry") {
-                    steps {
-                        dir("Todo-list/client") {
-                            script {
-                                container('docker') {
-                                    // Use withCredentials to retrieve the secret file
-                                    def envFile = [
-                                        'production': 'Production-Todo-List-React-.env-File',
-                                        'staging': 'Staging-Todo-List-React-.env-File',
-                                        'testing': 'Testing-Todo-List-React-.env-File'
-                                    ]
-                                    def tagPrefix = [
-                                        'production': '',
-                                        'staging': '-staging',
-                                        'testing': '-testing'
-                                    ]
+        //         stage("Build Client & Push To Registry") {
+        //             steps {
+        //                 dir("Todo-list/client") {
+        //                     script {
+        //                         container('docker') {
+        //                             // Use withCredentials to retrieve the secret file
+        //                             def envFile = [
+        //                                 'production': 'Production-Todo-List-React-.env-File',
+        //                                 'staging': 'Staging-Todo-List-React-.env-File',
+        //                                 'testing': 'Testing-Todo-List-React-.env-File'
+        //                             ]
+        //                             def tagPrefix = [
+        //                                 'production': '',
+        //                                 'staging': '-staging',
+        //                                 'testing': '-testing'
+        //                             ]
 
-                                    withCredentials([file(credentialsId: envFile[env.RELEASE_ENVIRONMENT], variable: 'ENV_FILE')]) {
-                                        // Copy the secret file to the desired location in the workspace
-                                        sh "cp \$ENV_FILE ./.env.prod"
-                                    }
+        //                             withCredentials([file(credentialsId: envFile[env.RELEASE_ENVIRONMENT], variable: 'ENV_FILE')]) {
+        //                                 // Copy the secret file to the desired location in the workspace
+        //                                 sh "cp \$ENV_FILE ./.env.prod"
+        //                             }
 
-                                    def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
-                                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-                                        def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        // dockerImage.push()
+        //                             def imageTag = "${DOCKER_REPOSITORY}/todo-list-client${tagPrefix[env.RELEASE_ENVIRONMENT]}:${IMAGE_TAG}"
+        //                             docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
+        //                                 def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
+        //                                 // dockerImage.push()
 
-                                        env.CLIENT_TAG = imageTag
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } 
-            }
-        }
+        //                                 env.CLIENT_TAG = imageTag
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         } 
+        //     }
+        // }
 
-        stage('Deploy') {
-            stages {
-                stage('Checkout Todo-List Chart Repository') {
-                    steps {
-                        container('git') {
-                            dir('Todo-List-Chart') {
-                                git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-List-Chart.git', branch: 'main'
-                            }
-                        }
-                    }
-                }
+        // stage('Deploy') {
+        //     stages {
+        //         stage('Checkout Todo-List Chart Repository') {
+        //             steps {
+        //                 container('git') {
+        //                     dir('Todo-List-Chart') {
+        //                         git credentialsId: 'Github-Credentials', url: 'https://github.com/Netanel-Iyov/Todo-List-Chart.git', branch: 'main'
+        //                     }
+        //                 }
+        //             }
+        //         }
 
-                stage('Update Helm Chart Values') {
-                    steps {
-                        dir('Todo-List-Chart') {
-                            container('git') {
-                                script {
-                                    def fileToUpdateMap = [
-                                        'production': 'values-prod.yaml',
-                                        'staging': 'values-staging.yaml',
-                                        'testing': 'values-testing.yaml'
-                                    ]
+        //         stage('Update Helm Chart Values') {
+        //             steps {
+        //                 dir('Todo-List-Chart') {
+        //                     container('git') {
+        //                         script {
+        //                             def fileToUpdateMap = [
+        //                                 'production': 'values-prod.yaml',
+        //                                 'staging': 'values-staging.yaml',
+        //                                 'testing': 'values-testing.yaml'
+        //                             ]
 
-                                    // Read the YAML file into a string
-                                    def fileToUpdate = fileToUpdateMap[env.RELEASE_ENVIRONMENT]
-                                    def yamlContent = readFile(fileToUpdate)
+        //                             // Read the YAML file into a string
+        //                             def fileToUpdate = fileToUpdateMap[env.RELEASE_ENVIRONMENT]
+        //                             def yamlContent = readFile(fileToUpdate)
                                     
-                                    // Replace the image tags using the environment variables
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, env.CLIENT_TAG)
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, env.API_TAG)
+        //                             // Replace the image tags using the environment variables
+        //                             yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, env.CLIENT_TAG)
+        //                             yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, env.API_TAG)
                                     
-                                    // Write the modified YAML content back to the file
-                                    writeFile file: fileToUpdate, text: yamlContent
+        //                             // Write the modified YAML content back to the file
+        //                             writeFile file: fileToUpdate, text: yamlContent
                                     
-                                    echo "${fileToUpdate} file has been updated with new versions..."
-                                    sh "cat ${fileToUpdate}"
+        //                             echo "${fileToUpdate} file has been updated with new versions..."
+        //                             sh "cat ${fileToUpdate}"
 
-                                    withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials')]) {
-                                        sh """
-                                            git config --global --add safe.directory ${pwd()}
-                                            git config --global user.name "Jenkins-CI-CD-Pipeline"
-                                            git config --global user.email "jenkins@jenkins.niyov.com"
-                                            git add .
+        //                             withCredentials([gitUsernamePassword(credentialsId: 'Github-Credentials')]) {
+        //                                 sh """
+        //                                     git config --global --add safe.directory ${pwd()}
+        //                                     git config --global user.name "Jenkins-CI-CD-Pipeline"
+        //                                     git config --global user.email "jenkins@jenkins.niyov.com"
+        //                                     git add .
 
-                                            git commit -m 'Jenkins CI-CD Pipeline: Updating ${fileToUpdate}, for ${RELEASE_TAG ?: BRANCH_NAME}'
-                                        """
-                                        // git push --set-upstream origin main
+        //                                     git commit -m 'Jenkins CI-CD Pipeline: Updating ${fileToUpdate}, for ${RELEASE_TAG ?: BRANCH_NAME}'
+        //                                 """
+        //                                 // git push --set-upstream origin main
 
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
 }

@@ -5,26 +5,26 @@ common:
   GITHUB_CREDENTIALS_ID: Github-Credentials
 
 production:
-  ref: refs/tags/${RELEASE_TAG}
-  apiImage: harbor.niyov.com/applications/todo-list-api
-  clientImage: harbor.niyov.com/applications/todo-list-client
-  clientEnvFile: Production-Todo-List-React-.env-File
-  helmChartBranch: main
-  helmChartVauesFile: values-prod.yaml
+  REF: refs/tags/${RELEASE_TAG}
+  API_IMAGE: harbor.niyov.com/applications/todo-list-api
+  CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client
+  CLIENT_ENV_FILE: Production-Todo-List-React-.env-File
+  HELM_CHART_BRANCH: main
+  HELM_CHART_VALUES_FILE: values-prod.yaml
 
 staging:
-  ref: refs/tags/${RELEASE_TAG}
-  apiImage: harbor.niyov.com/applications/todo-list-api-staging
-  clientImage: harbor.niyov.com/applications/todo-list-client-staging
-  clientEnvFile: Staging-Todo-List-React-.env-File
-  helmChartBranch: main
-  helmChartVauesFile: values-staging.yaml
+  REF: refs/tags/${RELEASE_TAG}
+  API_IMAGE: harbor.niyov.com/applications/todo-list-api-staging
+  CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client-staging
+  CLIENT_ENV_FILE: Staging-Todo-List-React-.env-File
+  HELM_CHART_BRANCH: main
+  HELM_CHART_VALUES_FILE: values-staging.yaml
 
 
 testing:
-  ref: refs/heads/${params.BRANCH}
-  apiImage: harbor.niyov.com/applications/todo-list-api-testing
-  clientImage: harbor.niyov.com/applications/todo-list-client-testing
-  clientEnvFile: Testing-Todo-List-React-.env-File
-  helmChartBranch: testing
-  helmChartVauesFile: values-testing.yaml
+  REF: refs/heads/${params.BRANCH}
+  API_IMAGE: harbor.niyov.com/applications/todo-list-api-testing
+  CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client-testing
+  CLIENT_ENV_FILE: Testing-Todo-List-React-.env-File
+  HELM_CHART_BRANCH: testing
+  HELM_CHART_VALUES_FILE: values-testing.yaml
