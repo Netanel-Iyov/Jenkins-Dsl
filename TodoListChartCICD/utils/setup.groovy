@@ -1,4 +1,25 @@
 def call(String varsFile) {
+    switch(env.ACTION) {
+        case 'released':
+            env.RELEASE_ENVIRONMENT = 'production'
+            currentBuild.displayName = "#${BUILD_NUMBER} - Production - ${RELEASE_TAG}"
+            env.REVISION = RELEASE_TAG
+            env.REF = "refs/tags/${RELEASE_TAG}"
+            break
+        case 'prereleased':
+            env.RELEASE_ENVIRONMENT = 'staging' 
+            currentBuild.displayName = "#${BUILD_NUMBER} - Staging - ${RELEASE_TAG}"
+            env.REVISION = RELEASE_TAG
+            env.REF = "refs/tags/${RELEASE_TAG}"
+            break
+        case null:
+            env.RELEASE_ENVIRONMENT = 'testing'
+            currentBuild.displayName = "#${BUILD_NUMBER} - Testing - ${params.BRANCH}"
+            env.REVISION = params.BRANCH
+            env.REF = "refs/heads/${params.BRANCH}"
+            break
+    }
+    
     def yamlFile = readYaml file: varsFile
     def envVarsToSet = yamlFile['common'] + yamlFile[env.RELEASE_ENVIRONMENT]
 
