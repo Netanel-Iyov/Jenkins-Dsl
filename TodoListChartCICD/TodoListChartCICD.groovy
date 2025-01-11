@@ -58,14 +58,9 @@ pipeline {
                             script {
                                 container('docker') {
                                     // Use withCredentials to retrieve the secret file
-                                    withCredentials([file(credentialsId: CLIENT_ENV_FILE, variable: 'ENV_FILE')]) {
-                                        // Copy the secret file to the desired location in the workspace
-                                        sh "cp \$ENV_FILE ./.env.prod"
-                                    }
-
                                     def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
                                     docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-                                        def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
+                                        def dockerImage = docker.build(imageTag, "--no-cache --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} -f Dockerfile.prod .")
                                         dockerImage.push()
 
                                         env.CLIENT_TAG = imageTag
