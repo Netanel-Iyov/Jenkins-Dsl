@@ -2,7 +2,7 @@
 def jobName = 'Todo-List-Chart-CICD'
 def fullJobName = PRODUCTION_ENV == 'true' ? jobName : "${JOBS_BASE_PATH}/${jobName}"
 pipelineJob(fullJobName) {
-    // if (PRODUCTION_ENV == 'true') {
+    if (PRODUCTION_ENV == 'true') {
         triggers {
             genericTrigger {
                 token('Todo-List-CICD')
@@ -20,7 +20,7 @@ pipelineJob(fullJobName) {
                 regexpFilterExpression("released|prereleased")
             }
         }
-    //}
+    }
 
     parameters {
         stringParam('BRANCH', '', 'Branch to deploy to testing environment (only for testing, other environments are triggered via Github webhooks)')
