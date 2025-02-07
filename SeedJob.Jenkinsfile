@@ -1,7 +1,7 @@
 // Uses Declarative syntax to run commands inside a container.
 pipeline {
     parameters {
-        string(name: 'REF', description: 'Push Event Branch Ref')
+        string(name: 'BRANCH', description: 'DSL Branch To Checkout On')
     }
 
     agent {
@@ -29,7 +29,7 @@ spec:
 
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: "*/${BRANCH}"]],
+                    branches: [[name: "*/${params.BRANCH}"]],
                     userRemoteConfigs: [
                         [ 
                             url: "https://github.com/Netanel-Iyov/Jenkins-Dsl.git",

@@ -25,7 +25,12 @@ pipeline {
                         
                         // set the image tag to be the commit hash in case of testing env deployment
                         if (RELEASE_ENVIRONMENT == 'testing') {
-                            env.IMAGE_TAG = sh('git rev-parse HEAD', returnStdout: true).trim()
+                            container('git') {
+                                sh "git config --global --add safe.directory ${pwd()}"
+                                def tag = sh returnStdout: true, script: 'git rev-parse HEAD'
+                                
+                                env.IMAGE_TAG = tag.trim()
+                            }
                         }
                     }
                 }
