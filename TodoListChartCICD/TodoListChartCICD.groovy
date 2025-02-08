@@ -116,7 +116,7 @@ pipeline {
                                             git add .
 
                                             git commit -m 'Jenkins CI-CD Pipeline: Updating ${APPLICATION_MANIFEST}, for ${REVISION}'
-                                            git push --set-upstream origin ${HELM_CHART_BRANCH}
+                                            git push --set-upstream origin ${ARGOCD_GITOPS_BRANCH}
                                         """
                                     }
                                 }
