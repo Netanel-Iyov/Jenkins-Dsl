@@ -24,6 +24,8 @@ pipelineJob(fullJobName) {
 
     parameters {
         stringParam('BRANCH', '', 'Branch to deploy to testing environment (only for testing, other environments are triggered via Github webhooks)')
+        stringParam('ACTION', '', 'Leave blank for testing environment (gets filled from github webhook)')
+        stringParam('RELEASE_TAG', '', 'Leave blank for testing environment (gets filled from github webhook)')
     }
 
     definition {
