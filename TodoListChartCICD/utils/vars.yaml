@@ -8,20 +8,20 @@ production:
   API_IMAGE: harbor.niyov.com/applications/todo-list-api
   CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client
   REACT_APP_API_BASE: https://api-todo-list.niyov.com
-  HELM_CHART_BRANCH: main
-  HELM_CHART_VALUES_FILE: values-prod.yaml
+  ARGOCD_GITOPS_BRANCH: main
+  APPLICATION_MANIFEST: todo-list-app/prod-app.yaml
 
 staging:
   API_IMAGE: harbor.niyov.com/applications/todo-list-api-staging
   CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client-staging
   REACT_APP_API_BASE: https://api-todo-list-staging.niyov.com
-  HELM_CHART_BRANCH: main
-  HELM_CHART_VALUES_FILE: values-staging.yaml
+  ARGOCD_GITOPS_BRANCH: main
+  APPLICATION_MANIFEST: todo-list-app/staging-app.yaml
 
 
 testing:
   API_IMAGE: harbor.niyov.com/applications/todo-list-api-testing
   CLIENT_IMAGE: harbor.niyov.com/applications/todo-list-client-testing
   REACT_APP_API_BASE: https://api-todo-list-testing.niyov.com
-  HELM_CHART_BRANCH: main
-  HELM_CHART_VALUES_FILE: values-testing.yaml
+  ARGOCD_GITOPS_BRANCH: main
+  APPLICATION_MANIFEST: todo-list-app/testing-app.yaml
