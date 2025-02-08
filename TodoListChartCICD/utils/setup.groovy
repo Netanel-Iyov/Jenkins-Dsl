@@ -12,7 +12,7 @@ def call(String varsFile) {
             env.REVISION = params.RELEASE_TAG
             env.REF = "refs/tags/${params.RELEASE_TAG}"
             break
-        case null:
+        default:
             env.RELEASE_ENVIRONMENT = 'testing'
             currentBuild.displayName = "#${BUILD_NUMBER} - Testing - ${params.BRANCH}"
             env.REVISION = params.BRANCH
