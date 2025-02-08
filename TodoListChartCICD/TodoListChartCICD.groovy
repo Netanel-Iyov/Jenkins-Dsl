@@ -99,8 +99,8 @@ pipeline {
                                     def yamlContent = readFile(APPLICATION_MANIFEST)
                                     
                                     // Replace the image tags using the environment variables
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, CLIENT_TAG)
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, API_TAG)
+                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:.+/, CLIENT_TAG)
+                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:.+/, API_TAG)
                                     
                                     // Write the modified YAML content back to the file
                                     writeFile file: APPLICATION_MANIFEST, text: yamlContent
