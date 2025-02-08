@@ -84,29 +84,29 @@ pipeline {
                     steps {
                         container('git') {
                             dir('Todo-List-Chart') {
-                                git credentialsId: GITHUB_CREDENTIALS_ID, url: 'https://github.com/Netanel-Iyov/Todo-List-Chart.git', branch: HELM_CHART_BRANCH
+                                git credentialsId: GITHUB_CREDENTIALS_ID, url: 'https://github.com/Netanel-Iyov/ArgoCD-GitOps.git', branch: ARGOCD_GITOPS_BRANCH
                             }
                         }
                     }
                 }
 
-                stage('Update Helm Chart Values') {
+                stage('Update Application Values') {
                     steps {
                         dir('Todo-List-Chart') {
                             container('git') {
                                 script {
                                     // Read the YAML file into a string
-                                    def yamlContent = readFile(HELM_CHART_VALUES_FILE)
+                                    def yamlContent = readFile(APPLICATION_MANIFEST)
                                     
                                     // Replace the image tags using the environment variables
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:\d+\.\d+\.\d+/, CLIENT_TAG)
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:\d+\.\d+\.\d+/, API_TAG)
+                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:.+/, CLIENT_TAG)
+                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:.+/, API_TAG)
                                     
                                     // Write the modified YAML content back to the file
-                                    writeFile file: HELM_CHART_VALUES_FILE, text: yamlContent
+                                    writeFile file: APPLICATION_MANIFEST, text: yamlContent
                                     
-                                    echo "${HELM_CHART_VALUES_FILE} file has been updated with new versions..."
-                                    sh "cat ${HELM_CHART_VALUES_FILE}"
+                                    echo "${APPLICATION_MANIFEST} file has been updated with new versions..."
+                                    sh "cat ${APPLICATION_MANIFEST}"
 
                                     withCredentials([gitUsernamePassword(credentialsId: GITHUB_CREDENTIALS_ID)]) {
                                         sh """
@@ -115,8 +115,8 @@ pipeline {
                                             git config --global user.email "jenkins@jenkins.niyov.com"
                                             git add .
 
-                                            git commit -m 'Jenkins CI-CD Pipeline: Updating ${HELM_CHART_VALUES_FILE}, for ${REVISION}'
-                                            git push --set-upstream origin ${HELM_CHART_BRANCH}
+                                            git commit -m 'Jenkins CI-CD Pipeline: Updating ${APPLICATION_MANIFEST}, for ${REVISION}'
+                                            git push --set-upstream origin ${ARGOCD_GITOPS_BRANCH}
                                         """
                                     }
                                 }

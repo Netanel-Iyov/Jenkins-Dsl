@@ -1,18 +1,18 @@
 def call(String varsFile) {
-    switch(env.ACTION) {
+    switch(params.ACTION) {
         case 'released':
             env.RELEASE_ENVIRONMENT = 'production'
-            currentBuild.displayName = "#${BUILD_NUMBER} - Production - ${RELEASE_TAG}"
-            env.REVISION = RELEASE_TAG
-            env.REF = "refs/tags/${RELEASE_TAG}"
+            currentBuild.displayName = "#${BUILD_NUMBER} - Production - ${params.RELEASE_TAG}"
+            env.REVISION = params.RELEASE_TAG
+            env.REF = "refs/tags/${params.RELEASE_TAG}"
             break
         case 'prereleased':
             env.RELEASE_ENVIRONMENT = 'staging' 
-            currentBuild.displayName = "#${BUILD_NUMBER} - Staging - ${RELEASE_TAG}"
-            env.REVISION = RELEASE_TAG
-            env.REF = "refs/tags/${RELEASE_TAG}"
+            currentBuild.displayName = "#${BUILD_NUMBER} - Staging - ${params.RELEASE_TAG}"
+            env.REVISION = params.RELEASE_TAG
+            env.REF = "refs/tags/${params.RELEASE_TAG}"
             break
-        case null:
+        default:
             env.RELEASE_ENVIRONMENT = 'testing'
             currentBuild.displayName = "#${BUILD_NUMBER} - Testing - ${params.BRANCH}"
             env.REVISION = params.BRANCH
@@ -31,10 +31,10 @@ def call(String varsFile) {
     // Validate tag version for staging and release environments
     if (env.RELEASE_ENVIRONMENT == 'staging' || env.RELEASE_ENVIRONMENT == 'production') {
         def pattern = ~/^v\d+\.\d+\.\d+$/
-        def validVersion = env.RELEASE_TAG ==~ pattern
+        def validVersion = params.RELEASE_TAG ==~ pattern
         if (!validVersion)
             error "RELEASE_TAG: ${RELEASE_TAG} is Not a Valid Version! Please fix the release/prerelease in Github."
-        env.IMAGE_TAG = env.RELEASE_TAG.substring(1)
+        env.IMAGE_TAG = params.RELEASE_TAG.substring(1)
     }
 }
 
