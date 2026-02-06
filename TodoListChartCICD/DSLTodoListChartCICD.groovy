@@ -2,7 +2,7 @@
 def jobName = 'Todo-List-Chart-CICD'
 
 pipelineJob(jobName) {
-    if (PRODUCTION_ENV == 'true') {
+    if (PRODUCTION_ENV == 'true') { // This variable is coming from the seed job Additional Parameters
         triggers {
             genericTrigger {
                 token('Todo-List-CICD')
@@ -32,7 +32,7 @@ pipelineJob(jobName) {
         cpsScm {
             scm {
                 git {
-                    branch '${BRANCH}'
+                    branch BRANCH // This variable is coming from the seed job Additional Parameters
                     remote {
                         url 'https://github.com/Netanel-Iyov/Jenkins-Dsl.git'
                         credentials('GitHub-Credentials')
