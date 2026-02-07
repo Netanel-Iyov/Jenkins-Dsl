@@ -14,8 +14,8 @@ spec:
 
     - name: kaniko
       image: gcr.io/kaniko-project/executor:latest
-      command: ["sleep"]
-      args: ["infinity"]
+      # command: ["sleep"]
+      # args: ["infinity"]
       volumeMounts:
         - name: workspace
           mountPath: /workspace
