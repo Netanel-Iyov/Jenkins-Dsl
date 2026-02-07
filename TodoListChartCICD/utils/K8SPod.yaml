@@ -4,28 +4,29 @@ spec:
   containers:
     - name: git
       image: alpine/git:2.45.2
-      command:
-        - sleep
-      args:
-        - infinity
+      command: ["sleep"]
+      args: ["infinity"]
+      
     - name: shell
       image: ubuntu
-      command:
-        - sleep
-      args:
-        - infinity
-    - name: docker
-      image: docker:latest
-      command:
-        - "sleep"
-      args:
-        - "99d"
+      command: ["sleep"]
+      args: ["infinity"]
+
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      command: ["sleep"]
+      args: ["infinity"]
       volumeMounts:
-        - name: docker-daemon
-          mountPath: /var/run/docker.sock
+        - name: workspace
+          mountPath: /workspace
+        - name: docker-config
+          mountPath: /kaniko/.docker
       tty: true
+
   volumes:
-    - name: docker-daemon
-      hostPath:
-        path: /var/run/docker.sock
-        type: Socket
+    - name: workspace
+      emptyDir: {}
+
+    # - name: docker-config
+    #   secret:
+    #     secretName: niyov-harbor-registry-secret
