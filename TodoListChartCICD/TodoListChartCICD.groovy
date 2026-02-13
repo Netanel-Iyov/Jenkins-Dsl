@@ -53,6 +53,7 @@ pipeline {
                                             --context=\$PWD \
                                             --destination=${env.apiImageTag} \
                                             --cache=true \
+                                            --snapshot-mode=redo \
                                             --cleanup
                                     """
                                 }
@@ -76,6 +77,7 @@ pipeline {
                                             --destination=${env.clientImageTag} \
                                             --cache=true \
                                             --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} \
+                                            --use-new-run \
                                             --cleanup
                                     """
                                 }
