@@ -78,6 +78,7 @@ pipeline {
                                             --cache=true \
                                             --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} \
                                             --use-new-run \
+                                            --snapshot-mode=time \
                                             --cleanup
                                     """
                                 }
