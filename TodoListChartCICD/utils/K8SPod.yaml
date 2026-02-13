@@ -29,3 +29,6 @@ spec:
     - name: docker-config
       secret:
         secretName: niyov-harbor-registry-secret
+        items:
+          - key: .dockerconfigjson
+            path: config.json
