@@ -37,8 +37,8 @@ pipeline {
             }
         }
 
-        //stage('Build') {
-            // parallel {
+        stage('Build') {
+            parallel {
                 stage("Build API & Push To Registry") {
                     steps {
                         dir("Todo-list/api") {
@@ -53,8 +53,7 @@ pipeline {
                                             --context=\$PWD \
                                             --destination=${env.apiImageTag} \
                                             --cache=true \
-                                            --snapshot-mode=redo \
-                                            --cleanup
+                                            --snapshot-mode=time
                                     """
                                 }
                             }
@@ -78,16 +77,15 @@ pipeline {
                                             --cache=true \
                                             --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} \
                                             --use-new-run \
-                                            --snapshot-mode=time \
-                                            --cleanup
+                                            --snapshot-mode=time
                                     """
                                 }
                             }
                         }
                     }
                 } 
-            // }
-        //}
+            }
+        }
 
         stage('Deploy') {
             stages {
