@@ -45,20 +45,16 @@ pipeline {
                             script {
                                 container('kaniko') {
                                     // define the full image tag
-                                    def imageTag = "${API_IMAGE}:${IMAGE_TAG}"
+                                    env.apiImageTag = "${API_IMAGE}:${IMAGE_TAG}"
 
                                     sh """
                                         /kaniko/executor \
                                             --dockerfile=Dockerfile.prod \
                                             --context=\$PWD \
-                                            --destination=${imageTag} \
+                                            --destination=${env.apiImageTag} \
                                             --cache=true \
-                                            --snapshot-mode=redo \
                                             --cleanup
                                     """
-
-                                    // optionally save the tag in env
-                                    env.API_TAG = "${DOCKER_REGISTRY}/${imageTag}"
                                 }
                             }
                         }
@@ -71,23 +67,17 @@ pipeline {
                             script {
                                 container('kaniko') {
                                     // full image tag
-                                    def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
-
-                                    sh """pwd && ls -la"""
+                                    env.clientImageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
 
                                     sh """
                                         /kaniko/executor \
                                             --dockerfile=Dockerfile.prod \
                                             --context=\$PWD \
-                                            --destination=${imageTag} \
+                                            --destination=${env.clientImageTag} \
                                             --cache=true \
-                                            --snapshot-mode=redo \
                                             --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} \
                                             --cleanup
                                     """
-
-                                    // save tag in env for later stages
-                                    env.CLIENT_TAG = "${DOCKER_REGISTRY}/${imageTag}"
                                 }
                             }
                         }
@@ -117,8 +107,8 @@ pipeline {
                                     def yamlContent = readFile(APPLICATION_MANIFEST)
                                     
                                     // Replace the image tags using the environment variables
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:.+/, CLIENT_TAG)
-                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:.+/, API_TAG)
+                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-client.*:.+/, env.clientImageTag)
+                                    yamlContent = yamlContent.replaceAll(/${DOCKER_REPOSITORY}\/todo-list-api.*:.+/, env.apiImageTag)
                                     
                                     // Write the modified YAML content back to the file
                                     writeFile file: APPLICATION_MANIFEST, text: yamlContent
