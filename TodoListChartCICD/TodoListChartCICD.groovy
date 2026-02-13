@@ -73,6 +73,8 @@ pipeline {
                                     // full image tag
                                     def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
 
+                                    sh """pwd && ls -la"""
+
                                     sh """
                                         /kaniko/executor \
                                             --dockerfile=Dockerfile.prod \
