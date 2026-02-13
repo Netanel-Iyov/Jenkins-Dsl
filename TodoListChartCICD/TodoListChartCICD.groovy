@@ -38,7 +38,7 @@ pipeline {
         }
 
         stage('Build') {
-            parallel {
+            // parallel {
                 stage("Build API & Push To Registry") {
                     steps {
                         dir("Todo-list/api") {
@@ -86,7 +86,7 @@ pipeline {
                         }
                     }
                 } 
-            }
+            // }
         }
 
         stage('Deploy') {
