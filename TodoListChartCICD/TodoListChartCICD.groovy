@@ -43,14 +43,21 @@ pipeline {
                     steps {
                         dir("Todo-list/api") {
                             script {
-                                container('docker') {
-                                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-                                        def imageTag = "${API_IMAGE}:${IMAGE_TAG}"
-                                        def dockerImage = docker.build(imageTag, "--no-cache -f Dockerfile.prod .")
-                                        dockerImage.push()
+                                container('kaniko') {
+                                    // define the full image tag
+                                    def imageTag = "${API_IMAGE}:${IMAGE_TAG}"
 
-                                        env.API_TAG = imageTag
-                                    }
+                                    sh """
+                                        /kaniko/executor \
+                                            --dockerfile=Dockerfile.prod \
+                                            --context=\$PWD \
+                                            --destination=${DOCKER_REGISTRY}/${imageTag} \
+                                            --cache=true \
+                                            --cleanup
+                                    """
+
+                                    // optionally save the tag in env
+                                    env.API_TAG = "${DOCKER_REGISTRY}/${imageTag}"
                                 }
                             }
                         }
@@ -61,15 +68,22 @@ pipeline {
                     steps {
                         dir("Todo-list/client") {
                             script {
-                                container('docker') {
-                                    // Use withCredentials to retrieve the secret file
+                                container('kaniko') {
+                                    // full image tag
                                     def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
-                                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS) {
-                                        def dockerImage = docker.build(imageTag, "--no-cache --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} -f Dockerfile.prod .")
-                                        dockerImage.push()
 
-                                        env.CLIENT_TAG = imageTag
-                                    }
+                                    sh """
+                                        /kaniko/executor \
+                                            --dockerfile=Dockerfile.prod \
+                                            --context=\$PWD \
+                                            --destination=${DOCKER_REGISTRY}/${imageTag} \
+                                            --cache=true \
+                                            --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} \
+                                            --cleanup
+                                    """
+
+                                    // save tag in env for later stages
+                                    env.CLIENT_TAG = "${DOCKER_REGISTRY}/${imageTag}"
                                 }
                             }
                         }
