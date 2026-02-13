@@ -1,6 +1,4 @@
 common:
-  DOCKER_REGISTRY: https://harbor.niyov.com
-  DOCKER_REGISTRY_CREDENTIALS: Private-Harbor-Credentials
   DOCKER_REPOSITORY: harbor.niyov.com/applications
   GITHUB_CREDENTIALS_ID: Github-Credentials
 

@@ -48,10 +48,11 @@ pipeline {
                                     def imageTag = "${API_IMAGE}:${IMAGE_TAG}"
 
                                     sh """
+                                        cat /kaniko/.docker/config.json
                                         /kaniko/executor \
                                             --dockerfile=Dockerfile.prod \
                                             --context=\$PWD \
-                                            --destination=${DOCKER_REGISTRY}/${imageTag} \
+                                            --destination=${imageTag} \
                                             --cache=true \
                                             --cleanup
                                     """
@@ -73,10 +74,11 @@ pipeline {
                                     def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
 
                                     sh """
+                                        cat /kaniko/.docker/config.json
                                         /kaniko/executor \
                                             --dockerfile=Dockerfile.prod \
                                             --context=\$PWD \
-                                            --destination=${DOCKER_REGISTRY}/${imageTag} \
+                                            --destination=${imageTag} \
                                             --cache=true \
                                             --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} \
                                             --cleanup
