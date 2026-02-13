@@ -37,7 +37,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        //stage('Build') {
             // parallel {
                 stage("Build API & Push To Registry") {
                     steps {
@@ -87,7 +87,7 @@ pipeline {
                     }
                 } 
             // }
-        }
+        //}
 
         stage('Deploy') {
             stages {
