@@ -48,8 +48,6 @@ pipeline {
                                     def imageTag = "${API_IMAGE}:${IMAGE_TAG}"
 
                                     sh """
-                                        ls -la /kaniko/.docker
-                                        cat /kaniko/.docker/config.json
                                         /kaniko/executor \
                                             --dockerfile=Dockerfile.prod \
                                             --context=\$PWD \
@@ -76,8 +74,6 @@ pipeline {
                                     def imageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
 
                                     sh """
-                                        ls -la /kaniko/.docker
-                                        cat /kaniko/.docker/config.json
                                         /kaniko/executor \
                                             --dockerfile=Dockerfile.prod \
                                             --context=\$PWD \
