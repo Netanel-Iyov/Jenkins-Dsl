@@ -19,14 +19,13 @@ spec:
       volumeMounts:
         - name: workspace
           mountPath: /workspace
-        # - name: docker-config
-        #   mountPath: /kaniko/.docker
+        - name: docker-config
+          mountPath: /kaniko/.docker
       tty: true
 
   volumes:
     - name: workspace
       emptyDir: {}
-
-    # - name: docker-config
-    #   secret:
-    #     secretName: niyov-harbor-registry-secret
+    - name: docker-config
+      secret:
+        secretName: niyov-harbor-registry-secret
