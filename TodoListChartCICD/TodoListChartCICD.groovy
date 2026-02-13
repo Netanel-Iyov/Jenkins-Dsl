@@ -37,55 +37,53 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            parallel {
-                stage("Build API & Push To Registry") {
-                    steps {
-                        dir("Todo-list/api") {
-                            script {
-                                container('kaniko') {
-                                    // define the full image tag
-                                    env.apiImageTag = "${API_IMAGE}:${IMAGE_TAG}"
+        stage("Build API & Push To Registry") {
+            steps {
+                dir("Todo-list/api") {
+                    script {
+                        container('kaniko') {
+                            // define the full image tag
+                            env.apiImageTag = "${API_IMAGE}:${IMAGE_TAG}"
 
-                                    sh """
-                                        /kaniko/executor \
-                                            --dockerfile=Dockerfile.prod \
-                                            --context=\$PWD \
-                                            --destination=${env.apiImageTag} \
-                                            --cache=true \
-                                            --snapshot-mode=time
-                                    """
-                                }
-                            }
+                            sh """
+                                /kaniko/executor \
+                                    --dockerfile=Dockerfile.prod \
+                                    --context=\$PWD \
+                                    --destination=${env.apiImageTag} \
+                                    --cache=true \
+                                    --snapshot-mode=time \
+                                    --cleanup
+                            """
                         }
                     }
                 }
-            
-                stage("Build Client & Push To Registry") {
-                    steps {
-                        dir("Todo-list/client") {
-                            script {
-                                container('kaniko') {
-                                    // full image tag
-                                    env.clientImageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
-
-                                    sh """
-                                        /kaniko/executor \
-                                            --dockerfile=Dockerfile.prod \
-                                            --context=\$PWD \
-                                            --destination=${env.clientImageTag} \
-                                            --cache=true \
-                                            --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} \
-                                            --use-new-run \
-                                            --snapshot-mode=time
-                                    """
-                                }
-                            }
-                        }
-                    }
-                } 
             }
         }
+    
+        stage("Build Client & Push To Registry") {
+            steps {
+                dir("Todo-list/client") {
+                    script {
+                        container('kaniko') {
+                            // full image tag
+                            env.clientImageTag = "${CLIENT_IMAGE}:${IMAGE_TAG}"
+
+                            sh """
+                                /kaniko/executor \
+                                    --dockerfile=Dockerfile.prod \
+                                    --context=\$PWD \
+                                    --destination=${env.clientImageTag} \
+                                    --cache=true \
+                                    --build-arg REACT_APP_API_BASE=${REACT_APP_API_BASE} \
+                                    --use-new-run \
+                                    --snapshot-mode=time \
+                                    --cleanup
+                            """
+                        }
+                    }
+                }
+            }
+        } 
 
         stage('Deploy') {
             stages {
